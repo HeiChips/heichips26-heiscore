@@ -1,0 +1,69 @@
+Net "clk_pad"         Loc = "IO_SB_A8" | SCHMITT_TRIGGER=true;
+Net "rst_n_pad"       Loc = "IO_SB_B7" | SCHMITT_TRIGGER=true; # ~RESET
+
+# JTAG -- EDITED FOR PICO DEBUG --
+Net "tdi_pad"         Loc = "IO_SA_A0";
+Net "tms_pad"         Loc = "IO_SA_B1";
+Net "tck_pad"         Loc = "IO_SA_A1";
+Net "tdo_pad"         Loc = "IO_SA_B0";
+# (skipping TRST_N for now, no debugger driven reset!)
+# JTAG -- EXTERNAL PINS --
+#Net "tdi_pad"         Loc = "IO_EA_A8";
+#Net "tms_pad"         Loc = "IO_EA_B8";
+#Net "tck_pad"         Loc = "IO_WB_A8";
+#Net "tdo_pad"         Loc = "IO_WB_B8";
+
+# EVERYTHING DISPLAY
+Net "gpio_pad[0]"     Loc = "IO_EB_A6"; # LCD_D0
+Net "gpio_pad[1]"     Loc = "IO_EB_B6"; # LCD_D1
+Net "gpio_pad[2]"     Loc = "IO_EB_A5"; # LCD_D2
+Net "gpio_pad[3]"     Loc = "IO_EB_B5"; # LCD_D3
+Net "gpio_pad[4]"     Loc = "IO_EB_A4"; # LCD_D4
+Net "gpio_pad[5]"     Loc = "IO_EB_B4"; # LCD_D5
+Net "gpio_pad[6]"     Loc = "IO_EB_A3"; # LCD_D6
+Net "gpio_pad[7]"     Loc = "IO_EB_B3"; # LCD_D7
+Net "gpio_pad[8]"     Loc = "IO_EB_B7"; # LCD_~WR
+Net "gpio_pad[9]"     Loc = "IO_EB_A7"; # LCD_C~D
+Net "gpio_pad[10]"    Loc = "IO_EB_B8"; # LCD_~RD
+Net "gpio_pad[11]"    Loc = "IO_EB_A2"; # LCD_VSYNC
+Net "gpio_pad[12]"    Loc = "IO_EB_B2"; # LCD_BL
+
+Net "gpio_pad[13]"    Loc = "IO_NB_A3"; # RUMBLE
+Net "gpio_pad[14]"    Loc = "IO_NB_A4"; # STATUS_LED
+Net "gpio_pad[15]"    Loc = "IO_NB_B3"; # PWM_SPEAKER
+
+# KEYS
+Net "gpio_pad[16]"    Loc = "IO_NB_B0"; # KEYS_X0
+Net "gpio_pad[17]"    Loc = "IO_NB_A2"; # KEYS_X1
+Net "gpio_pad[18]"    Loc = "IO_NB_A0"; # KEYS_Y0
+Net "gpio_pad[19]"    Loc = "IO_NB_B1"; # KEYS_Y1
+Net "gpio_pad[20]"    Loc = "IO_NB_A1"; # KEYS_Y2
+Net "gpio_pad[21]"    Loc = "IO_NB_B2"; # KEYS_Y3
+
+# UART
+Net "gpio_pad[22]"    Loc = "IO_EA_A7"; # UART_TX
+Net "gpio_pad[23]"    Loc = "IO_EA_B7"; # UART_RX
+
+# SPI
+Net "gpio_pad[24]"    Loc = "IO_EA_A3"; # SPI_SCK
+Net "gpio_pad[25]"    Loc = "IO_EA_B2"; # SPI_MOSI
+Net "gpio_pad[26]"    Loc = "IO_EA_A2"; # SPI_MISO
+Net "gpio_pad[27]"    Loc = "IO_EB_A1"; # SPI_CS
+Net "gpio_pad[28]"    Loc = "IO_EA_B3"; # SPI_~SDCS
+Net "gpio_pad[29]"    Loc = "IO_EB_B1"; # SPI_~SDEN
+
+Net "gpio_pad[30]"    Loc = "IO_EA_B0"; # MPL_RX
+Net "gpio_pad[31]"    Loc = "IO_EA_A0"; # MPL_~TX
+
+Net "xip_sck_pad"     Loc = "IO_EA_A4"; # XIP SPI sck
+Net "xip_csn_pad"     Loc = "IO_EA_B4"; # XIP SPI cs
+Net "xip_do_pad"      Loc = "IO_EA_A5"; # XIP SPI do
+Net "xip_di_pad"      Loc = "IO_EA_B5"; # XIP SPI di
+Net "xip_wpn_pad"     Loc = "IO_EA_A6"; # XIP SPI ~wp
+Net "xip_hold_pad"    Loc = "IO_EA_B6"; # XIP SPI hold
+
+# Temporary for HAT LCD reset
+Net "lcd_rst_n"       Loc = "IO_EB_A8"; # ~RESET
+
+# Unused
+#Net "led"             Loc = "IO_SB_B6";

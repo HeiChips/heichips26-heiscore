@@ -19,9 +19,6 @@ class GraphicsObject:
     def color(self, x: Operand, y: Operand) -> Renderable:
         pass
 
-    def solid(self, x: Operand, y: Operand) -> Renderable:
-        pass
-
     def tick(self) -> None:
         """State update for a time step."""
 
@@ -43,10 +40,6 @@ class GraphicsStash(GraphicsObject):
     def visible(self, x: Operand, y: Operand) -> Renderable:
         list_of_visibilities = [go.visible(x, y) for go in self.graphics]
         return Any(*list_of_visibilities)
-
-    def solid(self, x: Operand, y: Operand) -> Renderable:
-        list_of_solids = [go.solid(x, y) for go in self.graphics]
-        return Any(*list_of_solids)
 
     def color(self, x: Operand, y: Operand) -> Renderable:
         ret = Const(0)
@@ -76,20 +69,17 @@ class GraphicsStash(GraphicsObject):
 
 
 class Box(GraphicsObject):
-    def __init__(self, engine: Engine, lx: Operand, ly: Operand, ux: Operand, uy: Operand, color: Operand, solid: Operand = Const(False)) -> None:
+    def __init__(self, engine: Engine, lx: Operand, ly: Operand, ux: Operand, uy: Operand, color: Operand, type: int = 0) -> None:
         super().__init__(engine)
         self.lx = lx
         self.ly = ly
         self.ux = ux
         self.uy = uy
         self.box_color = color
-        self.solid = solid
+        self._type = Const(type, 4)
 
     def visible(self, x: Operand, y: Operand) -> Renderable:
         return All(x >= self.lx, y >= self.ly, x < self.ux, y < self.uy)
 
     def color(self, x: Operand, y: Operand) -> Renderable:
         return IfThenElse(self.visible(x, y), self.box_color, Const(0))
-
-    def solid(self, x: Operand, y: Operand) -> Renderable:
-        return self.solid

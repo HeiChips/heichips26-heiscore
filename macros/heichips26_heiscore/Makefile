@@ -23,6 +23,8 @@ MACROS_DIR      := macros
 COCOTB_DIR      := testbenches/cocotb
 VERILOG_TB_DIR 	:= testbenches/verilog
 VERILATOR_TB_DIR := testbenches/verilator
+TEST_DIR       	:= tests
+TEST_ART_DIR   	:= $(TEST_DIR)/artifacts
 REPORT_DIR     	:= verification
 SRC_DIR 		:= rtl
 GEN_DIR 		:= $(SRC_DIR)/generated
@@ -278,9 +280,18 @@ clean: ## Delete all generated files and folders of the TOP cell (LibreLane outp
 	rm -rf $(REPORT_DIR)
 	rm -rf $(COCOTB_DIR)/sim_build $(VERILOG_TB_DIR)/*.fst
 	rm -rf $(VERILATOR_TB_DIR)/obj_* $(VERILATOR_TB_DIR)/*.ppm $(VERILATOR_TB_DIR)/*_nl.v $(VERILATOR_TB_DIR)/sg13cmos5l_verilator.v
+	$(MAKE) clean-tests
 	find $(GEN_DIR) -mindepth 1 ! -name .gitignore -delete
 	@$(MAKE) -C fpga clean
 .PHONY: clean
+
+clean-tests: ## Delete the files the pytest suite generates under tests/artifacts (checked-in inputs stay)
+	rm -f  $(TEST_ART_DIR)/fpga/*_yosys.* $(TEST_ART_DIR)/fpga/*.bit \
+	       $(TEST_ART_DIR)/fpga/*impl.txt $(TEST_ART_DIR)/fpga/*rendered.sv
+	rm -f  $(TEST_ART_DIR)/vga_playground/*rendered.sv $(TEST_ART_DIR)/vga_playground/*rendered.v
+	rm -rf $(TEST_DIR)/.pytest_cache
+	find $(TEST_DIR) -name __pycache__ -type d -prune -exec rm -rf {} +
+.PHONY: clean-tests
 
 clean-macros: ## Delete all generated files and folders of all macros
 #	ToDo: this design currently has no macros under $(MACROS_DIR)/

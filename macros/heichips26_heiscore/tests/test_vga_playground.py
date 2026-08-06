@@ -8,7 +8,7 @@ from heiscore.core.vga import VGA
 
 
 def test_vga_playground():
-    e = Engine('heiscore_engine')
+    e = Engine('my_engine')
 
     graphics = GraphicsStash(e)
 

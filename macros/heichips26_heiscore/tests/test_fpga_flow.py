@@ -1,20 +1,57 @@
-import shutil
 import subprocess
+from pathlib import Path
 
-import pytest
+from nortl import Const, Engine, IfThenElse, Volatile
 
-from heiscore.top import MACRO_ROOT, emit
-
-BOARD = 'olimex-gatemate'
-TOOLS = ('make', 'yosys', 'nextpnr-himbaechel', 'gmpack')
+from heiscore import build_fpga
+from heiscore.core.vga import VGA
 
 
 def test_fpga_flow():
-    """Emit the engine, then build the bitstream through the board Makefile."""
-    for tool in TOOLS:
-        if shutil.which(tool) is None:
-            pytest.skip(f'{tool} is not on PATH; run inside nix develop')
+    e = build_fpga()
 
-    emit()
+    outfile = Path(__file__).parent / 'artifacts/fpga/rendered.sv'
 
-    subprocess.run(['make', '-C', str(MACRO_ROOT / 'fpga'), f'BOARD={BOARD}', 'gen_bitstream'], check=True)
+    with open(outfile, 'w') as fptr:
+        fptr.write(e.to_verilog())
+
+    # Yosys step
+    subprocess.run(['yosys', '-s', 'synthesize.ys'], cwd=Path(__file__).parent / 'artifacts/fpga', check=False)
+
+    # PnR
+    subprocess.run(
+        [
+            'nextpnr-himbaechel',
+            '--device=CCGM1A1',
+            '--json',
+            'gatemate_wrapper_yosys.json',
+            '-o',
+            'ccf=gatemate_constraints.ccf',
+            '-o',
+            'out=impl.txt',
+            '--router',
+            'router2',
+        ],
+        cwd=Path(__file__).parent / 'artifacts/fpga',
+        check=False,
+    )
+
+    # Generate Bitstream
+    subprocess.run(
+        ['gmpack', 'impl.txt', 'gatemate_wrapper.bit'],
+        cwd=Path(__file__).parent / 'artifacts/fpga',
+        check=False,
+    )
+
+    # Write bitstream to FPGA
+
+    subprocess.run(
+        [
+            'openFPGALoader',
+            '-c',
+            'dirtyJtag',
+            'gatemate_wrapper.bit',
+        ],
+        cwd=Path(__file__).parent / 'artifacts/fpga',
+        check=False,
+    )

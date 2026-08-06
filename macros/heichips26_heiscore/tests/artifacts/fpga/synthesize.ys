@@ -1,0 +1,6 @@
+read_verilog -sv gatemate_wrapper.sv;
+read_verilog -sv pll_10_to_25.v;
+read_verilog -sv rendered.sv
+synth_gatemate -top gatemate_wrapper -luttree -nomx8
+write_json gatemate_wrapper_yosys.json
+write_verilog gatemate_wrapper_yosys.v

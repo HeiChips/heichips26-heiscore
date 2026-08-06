@@ -12,7 +12,7 @@ module tt_um_vga_example(
 
 logic VGA_R, VGA_B, VGA_G;
 
-heiscore_engine I_DUT (
+my_engine I_DUT (
     .CLK_I(clk),
     .RST_ASYNC_I(~rst_n),
     .red(VGA_R),

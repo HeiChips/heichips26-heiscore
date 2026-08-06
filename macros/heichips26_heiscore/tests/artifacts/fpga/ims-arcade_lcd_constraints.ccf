@@ -1,0 +1,22 @@
+# Pin assignment for the LCD-only design on the Olimex GateMate EVB with the
+# IMS Arcade hat. The locations are taken from ims-arcade_constraints.ccf,
+# which documents the full hat pinout under the arcade SoC's net names.
+
+Pin_in  "CLK_I"        Loc = "IO_SB_A8" | SCHMITT_TRIGGER=true;  # 10 MHz osc
+Pin_in  "RSTN_ASYNC_I" Loc = "IO_SB_B7" | SCHMITT_TRIGGER=true;  # ~RESET
+
+Pin_out "LCD_D[0]"     Loc = "IO_EB_A6";
+Pin_out "LCD_D[1]"     Loc = "IO_EB_B6";
+Pin_out "LCD_D[2]"     Loc = "IO_EB_A5";
+Pin_out "LCD_D[3]"     Loc = "IO_EB_B5";
+Pin_out "LCD_D[4]"     Loc = "IO_EB_A4";
+Pin_out "LCD_D[5]"     Loc = "IO_EB_B4";
+Pin_out "LCD_D[6]"     Loc = "IO_EB_A3";
+Pin_out "LCD_D[7]"     Loc = "IO_EB_B3";
+
+Pin_out "LCD_WR_N"     Loc = "IO_EB_B7";  # LCD_~WR
+Pin_out "LCD_DC_N"     Loc = "IO_EB_A7";  # LCD_C~D
+Pin_out "LCD_RD_N"     Loc = "IO_EB_B8";  # LCD_~RD
+Pin_out "LCD_VSYNC"    Loc = "IO_EB_A2";
+Pin_out "LCD_BL"       Loc = "IO_EB_B2";  # backlight
+Pin_out "LCD_RST_N"    Loc = "IO_EB_A8";  # panel ~RESET
