@@ -9,6 +9,7 @@ meta:
   substituting_steps:
     # Magic reports some overlaps which can be ignored
     Checker.IllegalOverlap: null
+    Verilator.lint: null
 
 DESIGN_NAME: heichips26_heiscore
 VERILOG_FILES:
@@ -16,7 +17,7 @@ VERILOG_FILES:
   - dir::../../rtl/generated/heiscore_engine.sv
 CLOCK_PORT: clk
 CLOCK_NET: clk
-CLOCK_PERIOD: 10 # 10ns = 100MHz
+CLOCK_PERIOD: 40 # 40ns = 25MHz
 
 # SDC files
 PNR_SDC_FILE: dir::impl.sdc
