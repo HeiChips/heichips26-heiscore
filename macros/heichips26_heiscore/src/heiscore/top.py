@@ -26,8 +26,16 @@ def build() -> Engine:
 
     pong = Pong(engine, Const(0), Const(0))
     pong.construct_frame()
+    timer = engine.create_timer()
 
-    VGA(engine, pong).run()
+    with engine.fork("display_thread"):
+        VGA(engine, pong).run()
+
+    with engine.fork("main_loop"):
+        with engine.while_loop(Const(True)):
+            timer.wait_delay(20000)
+            pong.tick()
+
 
     return engine
 

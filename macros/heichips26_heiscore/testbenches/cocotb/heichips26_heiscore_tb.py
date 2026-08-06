@@ -1,5 +1,10 @@
 # SPDX-FileCopyrightText: 2026 XXX
 # SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+#
+# TODO: smoke test only. The macro is a 640x480@60 VGA source, so the real checks
+# are the sync timings on uo_out (line length, hsync/vsync pulse widths, frame
+# length). Until those are written, whole-frame checking lives in the Verilator
+# harness under testbenches/verilator.
 
 import os
 import re
@@ -20,9 +25,7 @@ gl       = os.getenv("GL", "0").strip().lower() in ("1", "true", "yes", "on")
 
 hdl_toplevel = "heichips26_heiscore"
 
-CTR_WIDTH        = 8
-CTR_MAX          = 2**CTR_WIDTH-1
-CLK_FREQ_HZ      = 50e6
+CLK_FREQ_HZ      = 25e6  # pixel clock
 CLK_FREQ_MHZ     = int(CLK_FREQ_HZ / 1e6)
 
 
@@ -46,9 +49,10 @@ async def reset(reset, clock, cycles=2):
 
 
 async def start_up(dut):
-    """Startup sequence: clock + reset, counter disabled (ui_in = 0), value cleared."""
+    """Startup sequence: clock + reset. ui_in is unused by the macro."""
     await start_clock(dut.clk, CLK_FREQ_MHZ)
     dut.ui_in.value = 0
+    dut.uio_in.value = 0
     await reset(dut.rst_n, dut.clk)
 
 
@@ -67,71 +71,18 @@ async def test_reset_clears_heichips26_heiscore(dut):
 
 
 @cocotb.test()
-async def test_holds_when_disabled(dut):
-    """With ui_in[0] = 0, uo_out must not change."""
+async def test_outputs_stay_driven(dut):
+    """Free-run for a couple of lines; uo_out must stay resolved."""
     logger = logging.getLogger("heichips26_heiscore_tb")
 
     logger.info("Startup sequence...")
     await start_up(dut)
 
-    dut.ui_in.value = 0
-    await ClockCycles(dut.clk, 20)
-
-    assert int(dut.uo_out.value) == 0, \
-        f"uo_out changed while disabled (got {int(dut.uo_out.value)})"
-
-    logger.info("Done!")
-
-
-@cocotb.test()
-async def test_increments_when_enabled(dut):
-    """With ui_in[0] = 1, uo_out must increment by 1 every clock."""
-    logger = logging.getLogger("heichips26_heiscore_tb")
-
-    logger.info("Startup sequence...")
-    await start_up(dut)
-
-    dut.ui_in.value = 1
-
-    # Sample on a few subsequent clock edges and verify monotonic +1
-    expected = 1
-    for _ in range(min(8, CTR_MAX + 1)):
+    for _ in range(2000):
         await RisingEdge(dut.clk)
         await Timer(1, "ns")  # let combinational settle past edge
-        got = int(dut.uo_out.value)
-        assert got == expected, f"expected {expected}, got {got}"
-        expected += 1
-
-    logger.info("Done!")
-
-
-@cocotb.test()
-async def test_wraps_at_max(dut):
-    """The counter value on uo_out must wrap from CTR_MAX back to 0."""
-    logger = logging.getLogger("heichips26_heiscore_tb")
-
-    logger.info("Startup sequence...")
-    await start_up(dut)
-
-    dut.ui_in.value = 1
-
-    # Run long enough to hit CTR_MAX and wrap
-    saw_max  = False
-    saw_wrap = False
-    prev     = 0
-    for _ in range(2 * (CTR_MAX + 1) + 4):
-        await RisingEdge(dut.clk)
-        await Timer(1, "ns")
-        cur = int(dut.uo_out.value)
-        if cur == CTR_MAX:
-            saw_max = True
-        if saw_max and prev == CTR_MAX and cur == 0:
-            saw_wrap = True
-            break
-        prev = cur
-
-    assert saw_max,  "uo_out never reached CTR_MAX"
-    assert saw_wrap, "uo_out did not wrap from CTR_MAX to 0"
+        assert dut.uo_out.value.is_resolvable, \
+            f"uo_out has undriven bits (got {dut.uo_out.value})"
 
     logger.info("Done!")
 
@@ -149,9 +100,8 @@ def heichips26_heiscore_runner():
         sources.append(Path(pdk_root) / pdk / "libs.ref" / scl / "verilog" / f"{scl}.v")
         sources.append(Path(pdk_root) / pdk / "libs.ref" / scl / "verilog" / "sg13cmos5l_udp.v")
 
-        # Unpowered gate-level netlist of the macro
-        sources.append(proj_path / f"../../final/nl/{hdl_toplevel}.nl.v")
-        sources.append(proj_path / f"../../macros/counter/final/nl/counter.nl.v")
+        # Unpowered gate-level netlist of the macro, as copied by `make copy-netlist`
+        sources.append(proj_path / f"../../netlist/nl/{hdl_toplevel}.nl.v")
 
         # Unpowered netlist: USE_POWER_PINS must NOT be defined at all
         # (passing USE_POWER_PINS=False would still define the macro).
