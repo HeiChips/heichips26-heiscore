@@ -142,7 +142,7 @@ def heichips26_heiscore_runner():
 
     sources  = []
     defines  = {}
-    includes = [proj_path / "../../rtl/"]
+    includes = [proj_path / "../../rtl/", proj_path / "../../rtl/generated/"]
 
     if gl:
         # SCL models
@@ -156,8 +156,9 @@ def heichips26_heiscore_runner():
         # Unpowered netlist: USE_POWER_PINS must NOT be defined at all
         # (passing USE_POWER_PINS=False would still define the macro).
     else:
+        # Pin wrapper plus the engine emitted by `make rtl` into rtl/generated/.
         sources.append(proj_path / "../../rtl/heichips26_heiscore.sv")
-        sources.append(proj_path / "../../macros/counter/rtl/counter.sv")
+        sources.append(proj_path / "../../rtl/generated/heiscore_engine.sv")
 
     build_args = []
 

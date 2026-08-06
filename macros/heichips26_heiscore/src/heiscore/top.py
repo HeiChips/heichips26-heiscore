@@ -14,8 +14,10 @@ ENGINE_NAME = 'heiscore_engine'
 LCD_ENGINE_NAME = 'heiscore_lcd_engine'
 
 MACRO_ROOT = Path(__file__).resolve().parents[2]
-RTL_PATH = Path('rtl') / f'{ENGINE_NAME}.sv'
-LCD_RTL_PATH = Path('rtl') / f'{LCD_ENGINE_NAME}.sv'
+
+GENERATED_DIR = Path('rtl') / 'generated'
+RTL_PATH = GENERATED_DIR / f'{ENGINE_NAME}.sv'
+LCD_RTL_PATH = GENERATED_DIR / f'{LCD_ENGINE_NAME}.sv'
 
 
 def build() -> Engine:

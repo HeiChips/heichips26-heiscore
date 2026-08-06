@@ -6,7 +6,7 @@ MAKEFILE_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 RUN_TAG = $(shell ls -1 $(LIBRELANE_DIR)/runs 2>/dev/null | tail -n 1)
 
 # Variables
-TOP = heichips26_digital_project
+TOP = heichips26_heiscore
 
 .DEFAULT_GOAL := help
 
@@ -22,8 +22,10 @@ WAVEFORM_VIEWER ?= gtkwave
 MACROS_DIR      := macros
 COCOTB_DIR      := testbenches/cocotb
 VERILOG_TB_DIR 	:= testbenches/verilog
+VERILATOR_TB_DIR := testbenches/verilator
 REPORT_DIR     	:= verification
 SRC_DIR 		:= rtl
+GEN_DIR 		:= $(SRC_DIR)/generated
 NET_NL_DIR    	:= netlist/nl
 NET_PNL_DIR  	:= netlist/pnl
 NET_SPICE_DIR 	:= netlist/spice
@@ -31,21 +33,38 @@ LIBRELANE_DIR 	:= flow/librelane
 FLOW_FINAL_DIR 	:= flow/final
 FINAL_DIR      	:= final
 
-# Variables for simulation and linting targets
-# The counter sub-macro is hardened separately (see macros/counter/), but its RTL
-# is needed for linting and RTL simulation of the whole design.
+# Python side: the nortl generator that emits $(GEN_DIR)/*.sv. That directory is
+# git-ignored from the inside, so the engines are build products like any other
+# and every target below regenerates them on demand.
+PY_DIR       := src
+PY_SRCS      := $(shell find $(PY_DIR) -name '*.py' 2>/dev/null)
+ENGINE       := $(GEN_DIR)/heiscore_engine.sv
+LCD_ENGINE   := $(GEN_DIR)/heiscore_lcd_engine.sv
+PYTHON       := PYTHONPATH=$(MAKEFILE_DIR)/$(PY_DIR):$$PYTHONPATH python3
+
+# Variables for simulation and linting targets. The engine is generated; the
+# LCD engine is FPGA-only and carries its own copy of the nortl_* modules, so it
+# is never read alongside $(ENGINE).
 MODULES_SYNTH := \
-	$(SRC_DIR)/heichips26_digital_project.sv \
-	$(MACROS_DIR)/counter/rtl/counter.sv
+	$(ENGINE) \
+	$(SRC_DIR)/heichips26_heiscore.sv
 
 MODULES_SIM := \
 	$(MODULES_SYNTH)
 
-# Source files for sim-rtl-verilog: auto-selects MODULES_SIM when CELL == TOP, single-file otherwise (prefers .sv, falls back to .v)
-_SIM_SRCS = $(if $(filter $(CELL),$(TOP)),$(MODULES_SIM),$(or $(wildcard $(SRC_DIR)/$(CELL).sv),$(SRC_DIR)/$(CELL).v))
+# Lint waivers for the generated engines (see rtl/generated.vlt). Kept out of
+# MODULES_SYNTH so yosys and LibreLane never see it.
+LINT_WAIVERS := $(SRC_DIR)/generated.vlt
 
-# Source files for lint-verilog: all synthesis sources for TOP, single-file otherwise (prefers .sv, falls back to .v)
-_LINT_SRCS = $(if $(filter $(CELL),$(TOP)),$(MODULES_SYNTH),$(or $(wildcard $(SRC_DIR)/$(CELL).sv),$(SRC_DIR)/$(CELL).v))
+# Source file for a single non-TOP CELL: hand-written $(SRC_DIR) first, then the
+# generated engines in $(GEN_DIR) (prefers .sv, falls back to .v)
+_CELL_SRC = $(or $(wildcard $(SRC_DIR)/$(CELL).sv),$(wildcard $(GEN_DIR)/$(CELL).sv),$(SRC_DIR)/$(CELL).v)
+
+# Source files for sim-rtl-verilog: auto-selects MODULES_SIM when CELL == TOP, single-file otherwise
+_SIM_SRCS = $(if $(filter $(CELL),$(TOP)),$(MODULES_SIM),$(_CELL_SRC))
+
+# Source files for lint-verilog: all synthesis sources for TOP, single-file otherwise
+_LINT_SRCS = $(if $(filter $(CELL),$(TOP)),$(MODULES_SYNTH),$(_CELL_SRC))
 
 # Testbench extension: prefers <CELL>_tb.sv, falls back to <CELL>_tb.v (dot is added at use site)
 _TB_EXT = $(if $(wildcard $(VERILOG_TB_DIR)/$(CELL)_tb.sv),sv,v)
@@ -63,21 +82,36 @@ help: ## Show this help message
 .PHONY: help
 # ================================================================================================
 
+rtl: $(ENGINE) $(LCD_ENGINE) ## Regenerate the engine RTL from the nortl sources
+.PHONY: rtl
+
+$(ENGINE): $(PY_SRCS)
+	$(PYTHON) -m heiscore.top
+
+$(LCD_ENGINE): $(PY_SRCS)
+	$(PYTHON) -m heiscore.top lcd
+
+pytest: ## Run the Python test suite (unit tests, LVS-VGA check, FPGA flows)
+	cd $(MAKEFILE_DIR) && $(PYTHON) -m pytest tests
+.PHONY: pytest
+# ================================================================================================
+
 
 # Linter Targets
-lint-verilog: ## Lint Verilog source files with Verilator (usage: make lint-verilog [CELL=<cellname>])
-	verilator --lint-only -I"$(SRC_DIR)" $(_LINT_SRCS)
+# The "| rtl" order-only prerequisite here and below emits the engines if they are
+# missing or older than the nortl sources; it is a no-op once they are up to date.
+lint-verilog: | rtl ## Lint Verilog source files with Verilator (usage: make lint-verilog [CELL=<cellname>])
+	verilator --lint-only --top-module $(CELL) -I"$(SRC_DIR)" -I"$(GEN_DIR)" $(LINT_WAIVERS) $(_LINT_SRCS)
 .PHONY: lint-verilog
 
-lint-verilog-all: ## Lint all Verilog source files (counter sub-macro + heichips26_digital_project)
-	$(MAKE) -C $(MACROS_DIR)/counter lint-verilog-all
+lint-verilog-all: ## Lint all Verilog source files (pin wrapper + generated engine)
 	$(MAKE) lint-verilog
 .PHONY: lint-verilog-all
 # ================================================================================================
 
 
 # Simulation Targets
-sim-rtl-verilog: ## Run RTL simulation of CELL cell with Icarus Verilog (usage: make sim-rtl-verilog [CELL=<cellname>])
+sim-rtl-verilog: | rtl ## Run RTL simulation of CELL cell with Icarus Verilog (usage: make sim-rtl-verilog [CELL=<cellname>])
 	iverilog -g2012 -DSIM -o $(VERILOG_TB_DIR)/test_$(CELL) $(_SIM_SRCS) $(VERILOG_TB_DIR)/$(CELL)_tb.$(_TB_EXT)
 	cd $(VERILOG_TB_DIR) && vvp test_$(CELL) -fst
 	rm -f $(VERILOG_TB_DIR)/test_$(CELL)
@@ -93,7 +127,7 @@ sim-view-verilog: ## View CELL cell Verilog simulation waveforms (usage: make si
 	fi
 .PHONY: sim-view-verilog
 
-sim-rtl-cocotb: ## Run RTL simulation of CELL cell with cocotb (usage: make sim-rtl-cocotb [CELL=<cellname>])
+sim-rtl-cocotb: | rtl ## Run RTL simulation of CELL cell with cocotb (usage: make sim-rtl-cocotb [CELL=<cellname>])
 	cd $(COCOTB_DIR) && python3 $(CELL)_tb.py
 .PHONY: sim-rtl-cocotb
 
@@ -111,7 +145,7 @@ sim-view-cocotb: ## View CELL cell cocotb simulation waveforms (usage: make sim-
 	fi
 .PHONY: sim-view-cocotb
 
-sim-all: ## Simulate the macro (RTL Verilog + RTL/GL cocotb for heichips26_digital_project)
+sim-all: ## Simulate the macro (RTL Verilog + RTL/GL cocotb for heichips26_heiscore)
 	$(MAKE) sim-rtl-verilog
 	$(MAKE) sim-rtl-cocotb
 	$(MAKE) sim-gl-cocotb
@@ -120,19 +154,20 @@ sim-all: ## Simulate the macro (RTL Verilog + RTL/GL cocotb for heichips26_digit
 
 
 # LibreLane Targets
-librelane: ## Run LibreLane with Magic and KLayout DRC checks.
+# config.yaml reads $(ENGINE), so every hardening entry point regenerates first.
+librelane: | rtl ## Run LibreLane with Magic and KLayout DRC checks.
 	librelane $(LIBRELANE_DIR)/config.yaml --pdk ${PDK} --pdk-root ${PDK_ROOT} --manual-pdk --save-views-to $(FLOW_FINAL_DIR)/
 .PHONY: librelane
 
-librelane-nodrc: ## Run LibreLane without DRC checks
+librelane-nodrc: | rtl ## Run LibreLane without DRC checks
 	librelane $(LIBRELANE_DIR)/config.yaml --pdk ${PDK} --pdk-root ${PDK_ROOT} --manual-pdk --save-views-to $(FLOW_FINAL_DIR)/ --skip KLayout.DRC --skip Magic.DRC
 .PHONY: librelane-nodrc
 
-librelane-magicdrc: ## Run LibreLane with only Magic DRC checks
+librelane-magicdrc: | rtl ## Run LibreLane with only Magic DRC checks
 	librelane $(LIBRELANE_DIR)/config.yaml --pdk ${PDK} --pdk-root ${PDK_ROOT} --manual-pdk --save-views-to $(FLOW_FINAL_DIR)/ --skip KLayout.DRC
 .PHONY: librelane-magicdrc
 
-librelane-klayoutdrc: ## Run LibreLane with only KLayout DRC checks
+librelane-klayoutdrc: | rtl ## Run LibreLane with only KLayout DRC checks
 	librelane $(LIBRELANE_DIR)/config.yaml --pdk ${PDK} --pdk-root ${PDK_ROOT} --manual-pdk --save-views-to $(FLOW_FINAL_DIR)/ --skip Magic.DRC
 .PHONY: librelane-klayoutdrc
 
@@ -198,24 +233,15 @@ copy-netlist: ## Copy final output spice, pnl and nl netlists from the last Libr
 
 
 # Build Targets
-build-counter: ## Lint, build, verify and simulate the counter macro
-	@$(MAKE) -C $(MACROS_DIR)/counter all
-.PHONY: build-counter
-
-build-macros: ## Lint, build, verify and simulate all macros
-	$(MAKE) build-counter
-#	ToDo: further macros
-.PHONY: build-macros
-
-build-fpga: ## Build FPGA bitstream (usage: make build-fpga [BOARD=ulx3s])
+build-fpga: | rtl ## Build FPGA bitstream (usage: make build-fpga [BOARD=olimex-gatemate])
 	@$(MAKE) -C fpga all
 .PHONY: build-fpga
 
-load-fpga: ## Load FPGA bitstream into SRAM (usage: make load-fpga [BOARD=ulx3s])
+load-fpga: ## Load FPGA bitstream into SRAM (usage: make load-fpga [BOARD=olimex-gatemate])
 	@$(MAKE) -C fpga load_bitstream
 .PHONY: load-fpga
 
-flash-fpga: ## Write FPGA bitstream to flash (usage: make flash-fpga [BOARD=ulx3s])
+flash-fpga: ## Write FPGA bitstream to flash (usage: make flash-fpga [BOARD=olimex-gatemate])
 	@$(MAKE) -C fpga flash_bitstream
 .PHONY: flash-fpga
 
@@ -235,9 +261,9 @@ build-top: ## Build macro (run LibreLane with KLayout & Magic DRC checks, copy r
 
 
 # Lint, Build, Verify and Simulate All Target
-all: ## Lint, build, verify and simulate the macros and the TOP cell
+all: ## Regenerate RTL, lint, build, verify and simulate the TOP cell
+	$(MAKE) rtl
 	$(MAKE) lint-verilog-all
-	$(MAKE) build-macros
 	$(MAKE) build-fpga
 	$(MAKE) build-top
 	$(MAKE) sim-all
@@ -251,16 +277,13 @@ clean: ## Delete all generated files and folders of the TOP cell (LibreLane outp
 	rm -rf final netlist
 	rm -rf $(REPORT_DIR)
 	rm -rf $(COCOTB_DIR)/sim_build $(VERILOG_TB_DIR)/*.fst
+	rm -rf $(VERILATOR_TB_DIR)/obj_* $(VERILATOR_TB_DIR)/*.ppm $(VERILATOR_TB_DIR)/*_nl.v $(VERILATOR_TB_DIR)/sg13cmos5l_verilator.v
+	find $(GEN_DIR) -mindepth 1 ! -name .gitignore -delete
 	@$(MAKE) -C fpga clean
 .PHONY: clean
 
-clean-counter: ## Delete all generated files and folders of the counter macro
-	@$(MAKE) -C $(MACROS_DIR)/counter clean
-.PHONY: clean-counter
-
 clean-macros: ## Delete all generated files and folders of all macros
-	$(MAKE) clean-counter
-#	ToDo: further macros
+#	ToDo: this design currently has no macros under $(MACROS_DIR)/
 .PHONY: clean-macros
 
 clean-all: ## Delete all generated files and folders of the macros and the TOP cell

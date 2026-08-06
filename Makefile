@@ -61,7 +61,13 @@ klayout-setup: ## Install the KLayout plugins in your user directory
 	@echo "All plugins have been installed!"
 .PHONY: klayout-setup
 
-precheck: $(PDK_ROOT)/$(PDK) ## Run the precheck on the design specified in submission.yaml
+MACRO_DIR ?= macros/heichips26_heiscore
+
+macro-rtl: ## Emit the generated Verilog of the design macro from its nortl sources
+	$(MAKE) -C $(MACRO_DIR) rtl
+.PHONY: macro-rtl
+
+precheck: $(PDK_ROOT)/$(PDK) macro-rtl ## Run the precheck on the design specified in submission.yaml
 	PDK_ROOT=$(PDK_ROOT) PDK=$(PDK) python3 .github/precheck/heichips_precheck.py --config submission.yaml
 .PHONY: precheck
 

@@ -144,15 +144,17 @@ make BOARD=icebreaker all
 make -C design/icebreaker all
 ```
 
-The RTL under `../rtl/` is generated — run `make rtl` in the macro root before
-building a bitstream if the nortl sources changed. `dut.mk` offers three source
-sets, because the boards do not all wrap the same thing:
+The engines under `../rtl/generated/` are emitted by `make rtl` in the macro root
+and are not part of the checkout — run it once, and again whenever the nortl
+sources change. `make build-fpga` from the macro root does that for you; entering
+this tree directly does not. `dut.mk` offers three source sets, because the boards
+do not all wrap the same thing:
 
 | Variable | Sources | Used by |
 |---|---|---|
-| `DUT_SRCS` | pin wrapper + `heiscore_engine.sv` | boards emulating the submitted top cell |
-| `DUT_ENGINE_SRCS` | `heiscore_engine.sv` | `olimex-gatemate` |
-| `DUT_LCD_SRCS` | `heiscore_lcd_engine.sv` | `ims-arcade` |
+| `DUT_SRCS` | pin wrapper + `generated/heiscore_engine.sv` | boards emulating the submitted top cell |
+| `DUT_ENGINE_SRCS` | `generated/heiscore_engine.sv` | `olimex-gatemate` |
+| `DUT_LCD_SRCS` | `generated/heiscore_lcd_engine.sv` | `ims-arcade` |
 
 The two engines each carry their own copy of the `nortl_*` library modules, so a
 board must pick exactly one of them.

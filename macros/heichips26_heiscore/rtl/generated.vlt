@@ -1,0 +1,15 @@
+// SPDX-FileCopyrightText: 2026 The HeiChips Contributors
+// SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+//
+// Lint waivers for the nortl-generated engines, passed to "make lint-verilog"
+// via LINT_WAIVERS.
+//
+// UNSIGNED fires ~60 times on the generated comparisons against zero and means
+// nothing about the design. It cannot be scoped to the generated files: it is
+// raised during elaboration, where "lint_off -file" no longer matches, and
+// 5.046 accepts neither -module nor -match on lint_off. The pin wrapper
+// contains no comparisons, so nothing hand-written is covered today.
+
+`verilator_config
+
+lint_off -rule UNSIGNED
