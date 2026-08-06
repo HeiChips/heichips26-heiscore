@@ -1,8 +1,8 @@
 # FPGA Emulation Flow
 
 This directory holds the FPGA emulation flow for this project's **top-level
-design** (`heichips26_digital_project`, defined in
-`../rtl/heichips26_digital_project.sv`), across several boards. Each board wraps it
+design** (`heichips26_heiscore`, defined in
+`../rtl/heichips26_heiscore.sv`), across several boards. Each board wraps it
 in a `<board>_top.sv` that maps board pins to the TinyTapeout-style
 `ui_in`/`uo_out`/`uio_*`/`ena`/`clk`/`rst_n` interface.
 
@@ -13,6 +13,8 @@ in a `<board>_top.sv` that maps board pins to the TinyTapeout-style
 
 | Board       | Directory       | Toolchain                              | Status                     |
 |-------------|-----------------|-----------------------------------------|----------------------------|
+| Olimex GateMate EVB | `fpga/design/olimex-gatemate/` | Yosys → nextpnr-himbaechel → gmpack | Build verified, **default** |
+| Olimex GateMate EVB + IMS Arcade hat | `fpga/design/ims-arcade/` | Yosys → nextpnr-himbaechel → gmpack | Build verified |
 | iCEBreaker  | `fpga/design/icebreaker/` | Yosys → nextpnr-ice40 → icepack      | Build verified, flash untested |
 | ULX3S       | `fpga/design/ulx3s/`   | Yosys → nextpnr-ecp5 → ecppack          | Tested, hardware flash-verified, default |
 | Tang Nano 9K| `fpga/design/nano9k/`  | Yosys → nextpnr-himbaechel → gowin_pack | Build verified, flash untested |
@@ -120,10 +122,10 @@ override anything.
 ## Picking a board
 
 `fpga/Makefile` is a thin dispatcher — it forwards every target to
-`fpga/design/$(BOARD)/Makefile`, defaulting to `BOARD := ulx3s`:
+`fpga/design/$(BOARD)/Makefile`, defaulting to `BOARD := olimex-gatemate`:
 
 ```make
-BOARD ?= ulx3s
+BOARD ?= olimex-gatemate
 %:
 	$(MAKE) -C design/$(BOARD) $@
 ```
@@ -131,7 +133,7 @@ BOARD ?= ulx3s
 So from `fpga/` you can either run the default board directly...
 
 ```sh
-make all              # ulx3s
+make all              # olimex-gatemate
 ```
 
 ...or pick another board with `BOARD=`, or `cd` into its directory —
@@ -142,20 +144,26 @@ make BOARD=icebreaker all
 make -C design/icebreaker all
 ```
 
-`heichips26_digital_project` instantiates the `counter` macro directly, so
-each board's `MODULES_SYNTH` pulls in
-`../../../macros/counter/rtl/counter.sv` alongside
-`../../../rtl/heichips26_digital_project.sv` — FPGA synthesis needs the full RTL
-hierarchy, unlike the ASIC LibreLane flow, which blackboxes `counter` as a
-separately hardened macro.
+The RTL under `../rtl/` is generated — run `make rtl` in the macro root before
+building a bitstream if the nortl sources changed. `dut.mk` offers three source
+sets, because the boards do not all wrap the same thing:
 
-The default board is a **ULX3S** (ECP5, open-source toolchain: Yosys →
-nextpnr-ecp5 → ecppack, flashed with openFPGALoader). `ulx3s_top.sv`
-wraps `heichips26_digital_project` and maps board pins to the
-TinyTapeout-style interface: the FIRE1/F1 button drives `ui_in[0]` (the
-design's enable input, hold to run), J1 header `gp[7:1]` carries the
-rest of `ui_in`, J1 header `gn[7:0]` is the bidirectional `uio`, the
-onboard LEDs mirror `uo_out`, and `BTN_PWRn` is `rst_n`.
+| Variable | Sources | Used by |
+|---|---|---|
+| `DUT_SRCS` | pin wrapper + `heiscore_engine.sv` | boards emulating the submitted top cell |
+| `DUT_ENGINE_SRCS` | `heiscore_engine.sv` | `olimex-gatemate` |
+| `DUT_LCD_SRCS` | `heiscore_lcd_engine.sv` | `ims-arcade` |
+
+The two engines each carry their own copy of the `nortl_*` library modules, so a
+board must pick exactly one of them.
+
+The default board is the **Olimex GateMate EVB** (Cologne Chip CCGM1A1: Yosys
+`synth_gatemate` → `nextpnr-himbaechel` → `gmpack`, flashed with
+openFPGALoader). `olimex_gatemate_top.sv` drives the engine directly rather than
+through the pin wrapper: a 10 MHz board oscillator feeds `pll_10_to_25` for the
+25 MHz pixel clock, and the engine's 1-bit colour channels are replicated across
+each 4-bit VGA channel of the resistor ladder. `ims-arcade` is the same board
+with the IMS Arcade hat, driving its ILI9341 panel from the LCD engine.
 
 ## Show Available Targets
 

@@ -47,3 +47,24 @@ IHP-Open-PDK/
 
 # KLayout
 klayoutrc.*
+
+# Python tooling
+.cache
+.mypy_cache
+.pytest_cache
+.ruff_cache
+.tox
+.venv
+dist/
+reports/
+*.egg-info
+.coverage*
+
+# Verilator LVS-VGA harness build products
+/macros/heichips26_heiscore/testbenches/verilator/obj_*
+/macros/heichips26_heiscore/testbenches/verilator/*.ppm
+/macros/heichips26_heiscore/testbenches/verilator/*_nl.v
+/macros/heichips26_heiscore/testbenches/verilator/sg13cmos5l_verilator.v
+
+# VGA playground export
+/macros/heichips26_heiscore/tests/artifacts/vga_playground/rendered.*

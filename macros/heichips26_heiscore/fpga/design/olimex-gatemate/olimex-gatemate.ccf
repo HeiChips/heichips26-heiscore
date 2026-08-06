@@ -1,0 +1,25 @@
+Pin_in "CLK_I" Loc = "IO_SB_A8" | SCHMITT_TRIGGER=true;  #10MHz osc
+Pin_out "locked" Loc = "IO_EB_A0";  #CCEVB J2 pin 33, Oli BANK_EB1 pin 19
+
+#Pin_out "CCEVB_LED" Loc = "IO_EB_B1";  #Oli BANK_EB1 pin 18
+#Pin_out "OLIMEX_LED" Loc = "IO_SB_B6";  #CCEVB J10 pin 18
+
+Pin_in  "RSTN_ASYNC_I" Loc = "IO_SB_B7" | SCHMITT_TRIGGER=true;  #10MHz osc
+
+Pin_out "VGA_HSYNC" Loc = "IO_WB_A1";
+Pin_out "VGA_VSYNC" Loc = "IO_WB_B1";
+
+Pin_out "VGA_RED3" Loc = "IO_WB_A2";
+Pin_out "VGA_RED2" Loc = "IO_WB_B2";
+Pin_out "VGA_RED1" Loc = "IO_WB_A3";
+Pin_out "VGA_RED0" Loc = "IO_WB_B3";
+
+Pin_out "VGA_GREEN3" Loc = "IO_WB_A4";
+Pin_out "VGA_GREEN2" Loc = "IO_WB_B4";
+Pin_out "VGA_GREEN1" Loc = "IO_WB_A5";
+Pin_out "VGA_GREEN0" Loc = "IO_WB_B5";
+
+Pin_out "VGA_BLUE3" Loc = "IO_WB_A6";
+Pin_out "VGA_BLUE2" Loc = "IO_WB_B6";
+Pin_out "VGA_BLUE1" Loc = "IO_WB_A7";
+Pin_out "VGA_BLUE0" Loc = "IO_WB_B7";

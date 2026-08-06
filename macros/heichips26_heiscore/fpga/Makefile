@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 
 # Dispatcher: forwards every target to the chosen board's own Makefile
-# (default: ulx3s). See ../README.md.
+# (default: olimex-gatemate). See ../README.md.
 
-BOARD ?= ulx3s
+BOARD ?= olimex-gatemate
 
 .DEFAULT_GOAL := help
 
