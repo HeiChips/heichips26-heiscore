@@ -24,14 +24,13 @@
     autoload_sibling_state_files: None,
     autoreload_files: None,
     waves: Some((
-        source: File("testbenches/verilog/heichips26_digital_project_tb.fst"),
+        source: File("testbenches/cocotb/sim_build/heichips26_heiscore.fst"),
         format: Fst,
         active_scope: Some(WaveScope((
             strs: [
-                "heichips26_digital_project_tb",
-                "dut_heichips26_digital_project",
+                "heichips26_heiscore",
             ],
-            id: Wellen((3)),
+            id: Wellen((2)),
         ))),
         items_tree: (
             items: [
@@ -77,86 +76,24 @@
                     unfolded: true,
                     selected: false,
                 ),
-                (
-                    item_ref: (8),
-                    level: 0,
-                    unfolded: true,
-                    selected: false,
-                ),
-                (
-                    item_ref: (9),
-                    level: 0,
-                    unfolded: true,
-                    selected: false,
-                ),
             ],
         ),
         displayed_items: {
             (1): Divider((
                 color: None,
                 background_color: None,
-                name: Some("CONSTANTS"),
+                name: Some("INPUTS"),
             )),
             (2): Variable((
                 variable_ref: (
                     path: (
                         strs: [
-                            "heichips26_digital_project_tb",
+                            "heichips26_heiscore",
                         ],
                         id: Wellen((2)),
-                    ),
-                    name: "CTR_WIDTH",
-                    id: Wellen((3)),
-                    index: None,
-                ),
-                color: None,
-                background_color: None,
-                display_name: "CTR_WIDTH",
-                display_name_type: Unique,
-                manual_name: None,
-                format: Some("Unsigned"),
-                field_formats: [],
-                height_scaling_factor: None,
-                analog: None,
-            )),
-            (3): Variable((
-                variable_ref: (
-                    path: (
-                        strs: [
-                            "heichips26_digital_project_tb",
-                        ],
-                        id: Wellen((2)),
-                    ),
-                    name: "CTR_MAX",
-                    id: Wellen((4)),
-                    index: None,
-                ),
-                color: None,
-                background_color: None,
-                display_name: "CTR_MAX",
-                display_name_type: Unique,
-                manual_name: None,
-                format: Some("Unsigned"),
-                field_formats: [],
-                height_scaling_factor: None,
-                analog: None,
-            )),
-            (4): Divider((
-                color: None,
-                background_color: None,
-                name: Some("INPUTS"),
-            )),
-            (5): Variable((
-                variable_ref: (
-                    path: (
-                        strs: [
-                            "heichips26_digital_project_tb",
-                            "dut_heichips26_digital_project",
-                        ],
-                        id: Wellen((3)),
                     ),
                     name: "clk",
-                    id: Wellen((8)),
+                    id: Wellen((1)),
                     index: None,
                 ),
                 color: None,
@@ -169,17 +106,16 @@
                 height_scaling_factor: None,
                 analog: None,
             )),
-            (6): Variable((
+            (3): Variable((
                 variable_ref: (
                     path: (
                         strs: [
-                            "heichips26_digital_project_tb",
-                            "dut_heichips26_digital_project",
+                            "heichips26_heiscore",
                         ],
-                        id: Wellen((3)),
+                        id: Wellen((2)),
                     ),
                     name: "rst_n",
-                    id: Wellen((10)),
+                    id: Wellen((4)),
                     index: None,
                 ),
                 color: None,
@@ -192,17 +128,38 @@
                 height_scaling_factor: None,
                 analog: None,
             )),
-            (7): Variable((
+            (4): Variable((
                 variable_ref: (
                     path: (
                         strs: [
-                            "heichips26_digital_project_tb",
-                            "dut_heichips26_digital_project",
+                            "heichips26_heiscore",
                         ],
-                        id: Wellen((3)),
+                        id: Wellen((2)),
+                    ),
+                    name: "ena",
+                    id: Wellen((3)),
+                    index: None,
+                ),
+                color: None,
+                background_color: None,
+                display_name: "ena",
+                display_name_type: Unique,
+                manual_name: None,
+                format: None,
+                field_formats: [],
+                height_scaling_factor: None,
+                analog: None,
+            )),
+            (5): Variable((
+                variable_ref: (
+                    path: (
+                        strs: [
+                            "heichips26_heiscore",
+                        ],
+                        id: Wellen((2)),
                     ),
                     name: "ui_in",
-                    id: Wellen((9)),
+                    id: Wellen((2)),
                     index: None,
                 ),
                 color: None,
@@ -215,22 +172,21 @@
                 height_scaling_factor: None,
                 analog: None,
             )),
-            (8): Divider((
+            (6): Divider((
                 color: None,
                 background_color: None,
                 name: Some("OUTPUTS"),
             )),
-            (9): Variable((
+            (7): Variable((
                 variable_ref: (
                     path: (
                         strs: [
-                            "heichips26_digital_project_tb",
-                            "dut_heichips26_digital_project",
+                            "heichips26_heiscore",
                         ],
-                        id: Wellen((3)),
+                        id: Wellen((2)),
                     ),
                     name: "uo_out",
-                    id: Wellen((12)),
+                    id: Wellen((5)),
                     index: None,
                 ),
                 color: None,
@@ -244,7 +200,7 @@
                 analog: None,
             )),
         },
-        display_item_ref_counter: 9,
+        display_item_ref_counter: 7,
         viewports: [
             (
                 curr_left: (0.0),

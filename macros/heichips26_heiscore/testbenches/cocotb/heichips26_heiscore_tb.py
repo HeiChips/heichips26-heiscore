@@ -18,7 +18,7 @@ scl      = os.getenv("SCL", "sg13cmos5l_stdcell")
 # GL=1 selects the gate-level netlist; anything else (unset, "0", "") stays in RTL mode.
 gl       = os.getenv("GL", "0").strip().lower() in ("1", "true", "yes", "on")
 
-hdl_toplevel = "heichips26_digital_project"
+hdl_toplevel = "heichips26_heiscore"
 
 CTR_WIDTH        = 8
 CTR_MAX          = 2**CTR_WIDTH-1
@@ -53,9 +53,9 @@ async def start_up(dut):
 
 
 @cocotb.test()
-async def test_reset_clears_heichips26_digital_project(dut):
+async def test_reset_clears_heichips26_heiscore(dut):
     """After reset deasserts, uo_out must be zero."""
-    logger = logging.getLogger("heichips26_digital_project_tb")
+    logger = logging.getLogger("heichips26_heiscore_tb")
 
     logger.info("Startup sequence...")
     await start_up(dut)
@@ -69,7 +69,7 @@ async def test_reset_clears_heichips26_digital_project(dut):
 @cocotb.test()
 async def test_holds_when_disabled(dut):
     """With ui_in[0] = 0, uo_out must not change."""
-    logger = logging.getLogger("heichips26_digital_project_tb")
+    logger = logging.getLogger("heichips26_heiscore_tb")
 
     logger.info("Startup sequence...")
     await start_up(dut)
@@ -86,7 +86,7 @@ async def test_holds_when_disabled(dut):
 @cocotb.test()
 async def test_increments_when_enabled(dut):
     """With ui_in[0] = 1, uo_out must increment by 1 every clock."""
-    logger = logging.getLogger("heichips26_digital_project_tb")
+    logger = logging.getLogger("heichips26_heiscore_tb")
 
     logger.info("Startup sequence...")
     await start_up(dut)
@@ -108,7 +108,7 @@ async def test_increments_when_enabled(dut):
 @cocotb.test()
 async def test_wraps_at_max(dut):
     """The counter value on uo_out must wrap from CTR_MAX back to 0."""
-    logger = logging.getLogger("heichips26_digital_project_tb")
+    logger = logging.getLogger("heichips26_heiscore_tb")
 
     logger.info("Startup sequence...")
     await start_up(dut)
@@ -136,7 +136,7 @@ async def test_wraps_at_max(dut):
     logger.info("Done!")
 
 
-def heichips26_digital_project_runner():
+def heichips26_heiscore_runner():
 
     proj_path = Path(__file__).resolve().parent
 
@@ -156,7 +156,7 @@ def heichips26_digital_project_runner():
         # Unpowered netlist: USE_POWER_PINS must NOT be defined at all
         # (passing USE_POWER_PINS=False would still define the macro).
     else:
-        sources.append(proj_path / "../../rtl/heichips26_digital_project.sv")
+        sources.append(proj_path / "../../rtl/heichips26_heiscore.sv")
         sources.append(proj_path / "../../macros/counter/rtl/counter.sv")
 
     build_args = []
@@ -185,11 +185,11 @@ def heichips26_digital_project_runner():
 
     runner.test(
         hdl_toplevel=hdl_toplevel,
-        test_module="heichips26_digital_project_tb",
+        test_module="heichips26_heiscore_tb",
         plusargs=plusargs,
         waves=True,
     )
 
 
 if __name__ == "__main__":
-    heichips26_digital_project_runner()
+    heichips26_heiscore_runner()

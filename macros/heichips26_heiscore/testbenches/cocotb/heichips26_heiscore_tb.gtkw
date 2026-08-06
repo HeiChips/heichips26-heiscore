@@ -1,0 +1,30 @@
+[*]
+[*] GTKWave Analyzer v3.3.128 (w)1999-2026 BSI
+[*] Tue Jul 21 13:55:08 2026
+[*]
+[dumpfile] "/home/leo/Repositories/heichips26/heichips26-template/macros/heichips26_heiscore/testbenches/cocotb/sim_build/heichips26_heiscore.fst"
+[dumpfile_mtime] "Tue Jul 21 13:53:57 2026"
+[dumpfile_size] 1219
+[savefile] "/home/leo/Repositories/heichips26/heichips26-template/macros/heichips26_heiscore/testbenches/cocotb/heichips26_heiscore_tb.gtkw"
+[timestart] 0
+[size] 1403 816
+[pos] -1 -1
+*-30.299999 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 297
+[signals_width] 126
+[sst_expanded] 1
+[sst_vpaned_height] 232
+@28
+heichips26_heiscore.clk
+heichips26_heiscore.rst_n
+heichips26_heiscore.ena
+@23
+heichips26_heiscore.count[7:0]
+@22
+heichips26_heiscore.ui_in[7:0]
+heichips26_heiscore.uio_in[7:0]
+heichips26_heiscore.uio_oe[7:0]
+heichips26_heiscore.uio_out[7:0]
+heichips26_heiscore.uo_out[7:0]
+[pattern_trace] 1
+[pattern_trace] 0

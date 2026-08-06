@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: 2026 XXX
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
-// Description: SystemVerilog testbench for the heichips26_digital_project module.
+// Description: SystemVerilog testbench for the heichips26_heiscore module.
 
 `timescale 1ns / 1ps
 
-module heichips26_digital_project_tb;
+module heichips26_heiscore_tb;
   // Parameters
   parameter  real CLK_FREQ      = 50.0e6;
   parameter  int  CTR_WIDTH     = 8;
@@ -18,7 +18,7 @@ module heichips26_digital_project_tb;
   logic [CTR_WIDTH-1:0] count;
 
   // DUT
-  heichips26_digital_project dut_heichips26_digital_project (
+  heichips26_heiscore dut_heichips26_heiscore (
     .clk      (clk),
     .rst_n    (rst_n),
     .ena      (1'b1),
@@ -36,7 +36,7 @@ module heichips26_digital_project_tb;
 
   // Self-checking stimulus
   initial begin
-    $dumpfile("heichips26_digital_project_tb.fst");
+    $dumpfile("heichips26_heiscore_tb.fst");
     $dumpvars;
 
     // Reset pulse (2 clock cycles)
@@ -70,4 +70,4 @@ module heichips26_digital_project_tb;
     $display("PASS: simulation complete.");
     $finish;
   end
-endmodule // heichips26_digital_project_tb
+endmodule // heichips26_heiscore_tb

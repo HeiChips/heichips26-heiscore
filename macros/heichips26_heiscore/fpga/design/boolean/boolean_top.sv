@@ -3,19 +3,20 @@
 
 `default_nettype none
 
-module basys3_top (
-    input logic clk,  // 100 MHz
+module boolean_top (
+    input  logic        clk, // 100 MHz
 
     input  logic [15:0] sw,
     output logic [15:0] led,
-    input  logic        btnC,
-    input  logic        btnU,
-    input  logic        btnL,
-    input  logic        btnR,
-    input  logic        btnD,
+    input  logic [3:0]  btn,
 
-    // Pmod JA
-    input logic [7:0] JA
+    // HDMI
+    //output  logic [2:0]  hdmi_tx_p,
+    //output  logic [2:0]  hdmi_tx_n,
+    //output  logic        hdmi_clk_n, hdmi_clk_p,
+
+    // RGB LEDs
+    output logic  [2:0]  RGB0, RGB1
 );
 
     logic rst_n;
@@ -26,7 +27,7 @@ module basys3_top (
     logic [7:0] uio_out;
     logic [7:0] uio_oe;
 
-    heichips26_digital_project heichips26_digital_project (
+    heichips26_heiscore heichips26_heiscore (
         .ui_in,    // Dedicated inputs
         .uo_out,   // Dedicated outputs
         .uio_in,   // IOs: Input path
@@ -46,6 +47,6 @@ module basys3_top (
     assign led[15:8] = uio_out;
 
     assign ena = 1'b1;
-    assign rst_n = !btnC;
+    assign rst_n = !btn[0];
 
 endmodule
