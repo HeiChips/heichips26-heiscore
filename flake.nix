@@ -38,6 +38,7 @@
             nix-eda.overlays.default
             devshell.overlays.default
             librelane.overlays.default
+            (import ./nix/overlay.nix)
           ];
         }
       );
@@ -61,6 +62,8 @@
               iverilog
               verilator
 
+              haskellPackages.sv2v
+
               # Waveform viewing
               gtkwave
 
@@ -69,7 +72,9 @@
               nextpnr
               icestorm
               trellis
+              gmtools
               openfpgaloader
+              heichips-udev-check
 
               # Analog
               xschem
@@ -88,6 +93,9 @@
                 # Plotting of Xschem simulation results
                 numpy
                 matplotlib
+
+                nortl
+                pytest
               ]
               ++ (pkgs.lib.optionals (lib.meta.availableOn pkgs.stdenv.hostPlatform cocotb) [ cocotb ]);
 
@@ -104,6 +112,14 @@
               {
                 name = "QT_LOGGING_RULES";
                 eval = "\"qt.multimedia.*=false\"";
+              }
+              {
+                name = "PYTHONPATH";
+                prefix = "$PRJ_ROOT/macros/heichips26_heiscore/src";
+              }
+              {
+                name = "HEICHIPS_UDEV_RULES_PRESENT";
+                eval = "$(${lib.getExe pkgs.heichips-udev-check})";
               }
             ];
           });
