@@ -186,6 +186,21 @@ assign uo_out = {vga_hsync, vga_b, vga_g, vga_r,
 
 ---
 
+## Verification
+
+
+**IMS Arcade** adds what the tiny slot has no pins for:
+
+- We have pytest :D
+  - Test for Ball dynamics
+  - There is VGA-Playground
+  - We have an FPGA
+
+We want to complete the verification with Verilator by comparing VGA signals from pre- to postlayout.
+
+
+---
+
 ## It already runs — on FPGA
 
 <div class="cols">
