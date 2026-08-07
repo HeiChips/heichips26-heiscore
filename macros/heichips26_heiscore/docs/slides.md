@@ -70,7 +70,8 @@ A complete Pong machine on 0.04 mm² of silicon — no CPU, no framebuffer, no e
 - Bouncing **ball** with a 10 × 10 colour bitmap, two **paddles**, playfield **frame**
 - Two **7-segment scores**; hitting the left or right wall scores for the other player, first to 10 restarts the match
 - Output is 1 bit per colour channel on `uo_out`, in **TinyVGA Pmod** pin order — plug a Pmod on the chip's IOs and it is on screen
-- ***
+
+---
 
 ## The twist: there is no Verilog source
 
@@ -78,17 +79,18 @@ The design is **written in Python** with [`nortl`](https://pypi.org/project/nort
 
 ```python
 def build() -> Engine:
-    engine = Engine('heiscore_engine')
-    pong = Pong(engine, Const(0), Const(0), Const(1))
-    timer = engine.create_timer()
+    engine = Engine(ENGINE_NAME)
 
-    with engine.fork('display_thread'):      # pixel sink, free running
+    p1_up = engine.define_input('p1_up')
+    p2_up = engine.define_input('p2_up')
+    p1_dn = engine.define_input('p1_dn')
+    p2_dn = engine.define_input('p2_dn')
+
+    pong = assemble_pong(engine, p1_up, p1_dn, p2_up, p2_dn)
+
+    with engine.fork('display_thread'):
         VGA(engine, pong).run()
 
-    with engine.fork('main_loop'):           # game clock
-        with engine.while_loop(Const(True)):
-            timer.wait_delay(20000)          # 800 µs @ 25 MHz
-            pong.tick()
     return engine
 ```
 
@@ -126,16 +128,30 @@ A `GraphicsStash` groups objects and resolves them front to back — that is the
 
 ---
 
+## Graphic Concept
+
+<p align="center">
+  <img src="../docs/pics/graphics_concept.png" width="800">
+</p>
+
+---
+
 ## Chip integration
 
 ```systemverilog
 heiscore_engine i_engine (
-    .CLK_I(clk), .RST_ASYNC_I(~rst_n),
-    .red(vga_r), .green(vga_g), .blue(vga_b),
-    .hsync(vga_hsync), .vsync(vga_vsync)
-);
-assign uo_out = {vga_hsync, vga_b, vga_g, vga_r,
-                 vga_vsync, vga_b, vga_g, vga_r};   // TinyVGA Pmod order
+        .CLK_I       (clk),
+        .RST_ASYNC_I (~rst_n),
+        .red         (vga_r),
+        .green       (vga_g),
+        .blue        (vga_b),
+        .hsync       (vga_hsync),
+        .vsync       (vga_vsync),
+        .p1_dn       (ui_in[0]),
+        .p1_up       (ui_in[1]),
+        .p2_dn       (ui_in[2]),
+        .p2_up       (ui_in[3])
+    );
 ```
 
 - `rtl/heichips26_heiscore.sv` is the **only** hand-written HDL: a pin wrapper on the standard HeiChips interface (`ui_in`, `uo_out`, `uio_*`, `ena`, `clk`, `rst_n`)
@@ -161,7 +177,7 @@ assign uo_out = {vga_hsync, vga_b, vga_g, vga_r,
 | Clock       | 25 MHz (40 ns)           |
 | Std cells   | 1 806 (+ 1 916 fill)     |
 | Flip-flops  | 135                      |
-| Utilization | 76 %                   |
+| Utilization | 76 %                     |
 | Routing     | Metal1–Metal4            |
 | Power       | 682 µW @ 1.2 V, 25 °C    |
 
@@ -188,6 +204,13 @@ assign uo_out = {vga_hsync, vga_b, vga_g, vga_r,
 
 ## Verification
 
+<div class="cols">
+<div>
+
+![w:440](../docs/pics/vga-monitor.png)
+
+</div>
+<div>
 
 **IMS Arcade** adds what the tiny slot has no pins for:
 
@@ -198,6 +221,8 @@ assign uo_out = {vga_hsync, vga_b, vga_g, vga_r,
 
 We want to complete the verification with Verilator by comparing VGA signals from pre- to postlayout.
 
+</div>
+</div>
 
 ---
 
