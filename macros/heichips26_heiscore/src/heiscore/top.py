@@ -73,7 +73,29 @@ def emit_arcade(outfile: Path | None = None) -> Path:
     return _write(build_arcade(), outfile or MACRO_ROOT / ARCADE_RTL_PATH)
 
 
+def _sink_clk_requests(engine: Engine) -> None:
+    """Give every nortl library instance a sink for its CLK_REQ output.
+
+    Since nortl 1.6.0 the library modules (timer, sync, edge detector, delay) carry a CLK_REQ
+    output, but nortl only wires it up when the engine is rendered with `clock_gating=True`.
+    `to_verilog()` defaults to no gating, which is what heiscore wants, so the port would be left
+    off the instantiation entirely and Verilator raises PINMISSING. Connecting it to an undriven
+    local keeps the instantiations complete without suppressing the warning design-wide. This
+    walks the instances instead of naming them, so it also covers the edge detectors, delays and
+    synchronizers nortl creates behind `Signal.rising_edge()` and friends.
+    """
+    for name, instance in engine.module_instances.items():
+        port = instance.module.clk_request_port
+
+        if port is None or port in instance.port_connections:
+            continue
+
+        engine.connect_module_port(name, port, engine.define_local(f'{name}_clk_req'))
+
+
 def _write(engine: Engine, outfile: Path) -> Path:
+    _sink_clk_requests(engine)
+
     outfile.parent.mkdir(parents=True, exist_ok=True)
     outfile.write_text(engine.to_verilog())
 
