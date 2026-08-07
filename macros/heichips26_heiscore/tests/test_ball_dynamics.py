@@ -14,11 +14,16 @@ class TestCollisionUpperLower(NoRTLTestBase[Engine]):
     def the_testbench(self, e: Engine) -> None:
         pong = Pong(e, Const(200), Const(200))
         pong.construct_frame()
+
+        # Make all walls reflective by setting type to 1
+        for item in pong.graphics:
+            item._type = Const(1, 4)
+
         pong.construct_ball()
 
         # Test collission to first wall
 
-        with e.for_loop(50, 550, 10) as x:
+        with e.for_loop(50, 500, 10) as x:
             e.set(pong.ball.position[0], x)
             e.set(pong.ball.position[1], 20)
 
@@ -43,9 +48,11 @@ class TestCollisionUpperLower(NoRTLTestBase[Engine]):
             self.assertEqual(pong.ball.direction[0], 0)
             self.assertEqual(pong.ball.direction[1], 0)
 
+        self.reset_timeout()
+
         # Test collission to second wall
 
-        with e.for_loop(50, 550, 10) as x:
+        with e.for_loop(50, 500, 10) as x:
             e.set(pong.ball.position[0], x)
             e.set(pong.ball.position[1], 460)
 
@@ -84,6 +91,11 @@ class TestCollisionLeftRight(NoRTLTestBase[Engine]):
     def the_testbench(self, e: Engine) -> None:
         pong = Pong(e, Const(200), Const(200))
         pong.construct_frame()
+
+        # Make all walls reflective by setting type to 1
+        for item in pong.graphics:
+            item._type = Const(1, 4)
+
         pong.construct_ball()
 
         # Test collission to first wall
