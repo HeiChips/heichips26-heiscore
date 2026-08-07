@@ -1,4 +1,4 @@
-from nortl import All, Any, Const, Engine, IfThenElse, Volatile
+from nortl import All, Any, Const, Engine, IfThenElse, Volatile, Concat
 from nortl.core.protocols import Operand, Renderable
 
 from heiscore.core.objects import Box, GraphicsObject, GraphicsStash
@@ -88,7 +88,7 @@ class Score(GraphicsStash):
         }
 
         for k, segment in self.segments.items():
-            value = Const(truth_table[0][k], 4)
+            value = Const(truth_table[0][k], 1)
             for i in range(16):
                 value = IfThenElse(new_value == Const(i), truth_table[i][k], value)
             self.engine.set(segment.enabled, value)
@@ -163,8 +163,8 @@ class Ball(GraphicsObject):
             pass
 
     def mechanics(self) -> None:
-        self.engine.set(self.position[0], IfThenElse(self.direction[0], self.position[0] - self.velocity[0], self.position[0] + self.velocity[0]))
-        self.engine.set(self.position[1], IfThenElse(self.direction[1], self.position[1] - self.velocity[1], self.position[1] + self.velocity[1]))
+        self.engine.set(self.position[0], IfThenElse(self.direction[0], self.position[0] - Concat(Const(0, 6), self.velocity[0]), self.position[0] + Concat(Const(0,6), self.velocity[0])))
+        self.engine.set(self.position[1], IfThenElse(self.direction[1], self.position[1] - Concat(Const(0, 6), self.velocity[1]), self.position[1] + Concat(Const(0,6), self.velocity[1])))
 
         self.engine.sync()
 
