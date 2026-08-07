@@ -3,25 +3,24 @@ from pathlib import Path
 
 from nortl import Engine
 
-from heiscore.core.objects import Box, GraphicsStash
 from heiscore.core.vga import VGA
-
+from heiscore import assemble_pong
 
 def test_vga_playground():
     e = Engine('my_engine')
 
-    graphics = GraphicsStash(e)
+    p1_up = e.define_input("p1_up")
+    p2_up = e.define_input("p2_up")
+    p1_dn = e.define_input("p1_dn")
+    p2_dn = e.define_input("p2_dn")
 
-    b1 = Box(e, 20, 20, 50, 50, 0x5)
-    b2 = Box(e, 30, 30, 60, 70, 0x2)
-    b3 = Box(e, 40, 40, 80, 80, 0x2)
 
-    graphics.register(b1)
-    graphics.register(b2)
-    graphics.register(b3)
+    pong = assemble_pong(e, p1_up, p1_dn, p2_up, p2_dn)
 
-    display = VGA(e, graphics)
-    display.run()
+    vga_display = VGA(e, pong)
+
+    with e.fork('VGA_interface'):
+        vga_display.run()
 
     with open(Path(__file__).parent / 'artifacts/vga_playground/vga_playground_wrapper.sv') as fptr:
         wrapper_sv = fptr.read()

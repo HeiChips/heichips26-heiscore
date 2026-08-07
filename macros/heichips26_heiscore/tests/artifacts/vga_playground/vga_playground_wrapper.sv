@@ -19,7 +19,11 @@ my_engine I_DUT (
     .green(VGA_G),
     .blue(VGA_B),
     .hsync(VGA_HSYNC),
-    .vsync(VGA_VSYNC)
+    .vsync(VGA_VSYNC),
+    .p1_up(ui_in[0]),
+    .p1_dn(ui_in[1]),
+    .p2_up(ui_in[6]),
+    .p2_dn(ui_in[7])
 );
 
 assign uo_out = {VGA_HSYNC, VGA_B, VGA_G, VGA_R, VGA_VSYNC, VGA_B, VGA_G, VGA_R};
