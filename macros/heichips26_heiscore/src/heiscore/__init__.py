@@ -1,8 +1,10 @@
-from nortl import Const, Engine, IfThenElse, Volatile, Any
+from nortl import Any, Concat, Const, Engine, IfThenElse, Volatile
 from nortl.core.protocols import Renderable
 
 from .core.vga import VGA
+from .music import MusicSequencerPWM
 from .pong import Pong
+
 
 def assemble_pong(e: Engine, p1_up: Renderable, p1_dn: Renderable, p2_up: Renderable, p2_dn: Renderable) -> Pong:
     paddle_pos1 = Volatile(e.define_scratch(9), 'identical_rw', 'exclusive_read')
@@ -56,7 +58,6 @@ def build_fpga() -> Engine:
     p1_dn = Volatile(e.define_local('P1_DN', 1, 0), 'identical_rw')
     p2_dn = Volatile(e.define_local('P2_DN', 1, 0), 'identical_rw')
 
-
     pong = assemble_pong(e, p1_up, p1_dn, p2_up, p2_dn)
 
     interlock_delay = e.create_timer()
@@ -64,7 +65,6 @@ def build_fpga() -> Engine:
     e.sync()
 
     vga_display = VGA(e, pong)
-
 
     with e.fork('VGA_interface'):
         vga_display.run()
@@ -83,5 +83,29 @@ def build_fpga() -> Engine:
             e.set(p2_dn, ~keys_y[0])
             interlock_delay.wait_delay(2000)
 
+    # Wait for the music
 
+    music = MusicSequencerPWM(e, e.define_output('music_pwm', 1, 0), 2)
+    music.build_channels()
+
+    start = e.define_local('start_music', 1, value=Any(p1_dn, p1_up, p2_dn, p2_up))
+
+    with e.fork('music_input'):
+        e.wait_for(Volatile(start, 'identical_rw', 'exclusive_read'))
+        music.input_channels[0].send(Concat(Const(7, 4), music.tone_to_id['A']))
+        music.input_channels[0].send(Concat(Const(1, 4), Const(0, 4)))
+        music.input_channels[0].send(Concat(Const(7, 4), music.tone_to_id['A']))
+        music.input_channels[0].send(Concat(Const(1, 4), Const(0, 4)))
+        music.input_channels[0].send(Concat(Const(7, 4), music.tone_to_id['A']))
+        music.input_channels[0].send(Concat(Const(1, 4), Const(0, 4)))
+        music.input_channels[0].send(Concat(Const(6, 4), music.tone_to_id['F']))
+        music.input_channels[0].send(Concat(Const(2, 4), music.tone_to_id['C2']))
+        music.input_channels[0].send(Concat(Const(7, 4), music.tone_to_id['A']))
+        music.input_channels[0].send(Concat(Const(1, 4), Const(0, 4)))
+        music.input_channels[0].send(Concat(Const(6, 4), music.tone_to_id['F']))
+        music.input_channels[0].send(Concat(Const(2, 4), music.tone_to_id['C2']))
+        music.input_channels[0].send(Concat(Const(7, 4), music.tone_to_id['A']))
+        music.input_channels[0].send(Concat(Const(1, 4), Const(0, 4)))
+        music.input_channels[0].send(Concat(Const(16, 4), music.tone_to_id['A']))
+        music.input_channels[0].send(Concat(Const(16, 4), Const(0, 4)))
     return e
