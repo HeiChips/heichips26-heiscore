@@ -51,7 +51,7 @@ class Pong(GraphicsStash):
         self.score_1.set_value(0)
         self.score_2.set_value(0)
 
-    def construct_ball(self) -> None:
+    def construct_ball(self, add_callbacks: bool = True) -> None:
         self.ball = Ball(self.engine, self)
         self.register(self.ball)
         self.initialize_ball_position()
@@ -78,13 +78,13 @@ class Pong(GraphicsStash):
             with self.engine.condition(Any(self.score_1.get_value() == 0xA, self.score_2.get_value() == 0xA)):
                 self.score_1.set_value(0)
                 self.score_2.set_value(0)
-                self.wait_for_start()
             with self.engine.else_condition():
                 pass
 
-        self.ball.collision_callbacks.append(cb_player1_points)
-        self.ball.collision_callbacks.append(cb_player2_points)
-        self.ball.collision_callbacks.append(cb_end_of_game)
+        if add_callbacks:
+            self.ball.collision_callbacks.append(cb_player1_points)
+            self.ball.collision_callbacks.append(cb_player2_points)
+            self.ball.collision_callbacks.append(cb_end_of_game)
 
     def initialize_ball_position(self) -> None:
         self.engine.set(self.ball.position[0], 640 // 2)

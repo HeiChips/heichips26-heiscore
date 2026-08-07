@@ -1,10 +1,12 @@
-from nortl import Const, Engine, IfThenElse, Volatile, Any
+from nortl import Any, Concat, Const, Engine, IfThenElse, Volatile
 from nortl.core.protocols import Renderable
 
-from .core.lcd import MADCTL_LANDSCAPE_BGR, LCD
+from .core.lcd import LCD, MADCTL_LANDSCAPE_BGR
 from .core.transform import Viewport
 from .core.vga import VGA
+from .music import MusicSequencerPWM
 from .pong import Pong
+
 
 def assemble_pong(e: Engine, p1_up: Renderable, p1_dn: Renderable, p2_up: Renderable, p2_dn: Renderable) -> Pong:
     paddle_pos1 = Volatile(e.define_scratch(9), 'identical_rw', 'exclusive_read')
@@ -85,6 +87,32 @@ def scan_keys(e: Engine, timer, keys_x, keys_y, p1_up, p1_dn, p2_up, p2_dn) -> N
         timer.wait_delay(2000)
 
 
+def make_music(e: Engine, start_music: Renderable):
+
+    # Wait for the music
+
+    music = MusicSequencerPWM(e, e.define_output('SPEAKER_PWM', 1, 0), 2)
+    music.build_channels()
+    with e.fork('music_input'):
+        e.wait_for(Volatile(start_music, 'identical_rw', 'exclusive_read'))
+        music.input_channels[0].send(Concat(Const(7, 4), music.tone_to_id['A']))
+        music.input_channels[0].send(Concat(Const(1, 4), Const(0, 4)))
+        music.input_channels[0].send(Concat(Const(7, 4), music.tone_to_id['A']))
+        music.input_channels[0].send(Concat(Const(1, 4), Const(0, 4)))
+        music.input_channels[0].send(Concat(Const(7, 4), music.tone_to_id['A']))
+        music.input_channels[0].send(Concat(Const(1, 4), Const(0, 4)))
+        music.input_channels[0].send(Concat(Const(6, 4), music.tone_to_id['F']))
+        music.input_channels[0].send(Concat(Const(2, 4), music.tone_to_id['C2']))
+        music.input_channels[0].send(Concat(Const(7, 4), music.tone_to_id['A']))
+        music.input_channels[0].send(Concat(Const(1, 4), Const(0, 4)))
+        music.input_channels[0].send(Concat(Const(6, 4), music.tone_to_id['F']))
+        music.input_channels[0].send(Concat(Const(2, 4), music.tone_to_id['C2']))
+        music.input_channels[0].send(Concat(Const(7, 4), music.tone_to_id['A']))
+        music.input_channels[0].send(Concat(Const(1, 4), Const(0, 4)))
+        music.input_channels[0].send(Concat(Const(16, 4), music.tone_to_id['A']))
+        music.input_channels[0].send(Concat(Const(16, 4), Const(0, 4)))
+
+
 def build_fpga() -> Engine:
     e = Engine('my_engine')
 
@@ -98,12 +126,13 @@ def build_fpga() -> Engine:
 
     vga_display = VGA(e, pong)
 
-
     with e.fork('VGA_interface'):
         vga_display.run()
     with e.fork('input_handler'):
         scan_keys(e, interlock_delay, keys_x, keys_y, p1_up, p1_dn, p2_up, p2_dn)
 
+    start_music = e.define_local('start_music', 1, value=Any(p1_dn, p1_up, p2_dn, p2_up))
+    make_music(e, start_music)
 
     return e
 
@@ -137,5 +166,8 @@ def build_arcade() -> Engine:
         lcd_display.run()
     with e.fork('input_handler'):
         scan_keys(e, interlock_delay, keys_x, keys_y, p1_up, p1_dn, p2_up, p2_dn)
+
+    start_music = e.define_local('start_music', 1, value=Any(p1_dn, p1_up, p2_dn, p2_up))
+    make_music(e, start_music)
 
     return e

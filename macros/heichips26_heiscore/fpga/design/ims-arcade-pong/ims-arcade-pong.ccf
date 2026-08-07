@@ -55,3 +55,6 @@ Pin_in  "KEYS_Y[0]"    Loc = "IO_NB_A0";
 Pin_in  "KEYS_Y[1]"    Loc = "IO_NB_B1";
 Pin_in  "KEYS_Y[2]"    Loc = "IO_NB_A1";
 Pin_in  "KEYS_Y[3]"    Loc = "IO_NB_B2";
+
+# PWM_SPEAKER
+Pin_out "SPEAKER_PWM"    Loc = "IO_NB_B3"; # PWM_SPEAKER

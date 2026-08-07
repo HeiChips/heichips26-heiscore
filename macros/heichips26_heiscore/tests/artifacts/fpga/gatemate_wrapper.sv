@@ -21,7 +21,9 @@ module gatemate_wrapper(
     output logic VGA_BLUE0,
 
     input  logic [3:0] KEYS_Y,
-    output logic [1:0] KEYS_X
+    output logic [1:0] KEYS_X,
+
+    output logic SPEAKER_PWM
 
 );
 
@@ -46,6 +48,7 @@ my_engine I_DUT (
     .vsync(VGA_VSYNC),
     .KEYS_X(KEYS_X),
     .KEYS_Y(KEYS_Y),
+    .SPEAKER_PWM(SPEAKER_PWM)
 );
 
 always_comb begin

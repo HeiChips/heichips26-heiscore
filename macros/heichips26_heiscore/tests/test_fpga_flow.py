@@ -1,10 +1,7 @@
 import subprocess
 from pathlib import Path
 
-from nortl import Const, Engine, IfThenElse, Volatile
-
 from heiscore import build_fpga
-from heiscore.core.vga import VGA
 
 
 def test_fpga_flow():

@@ -45,7 +45,11 @@ module ims_arcade_pong_top (
 
     // Hat key matrix: two column drives, four row returns, active low.
     output logic [1:0] KEYS_X,
-    input  logic [3:0] KEYS_Y
+    input  logic [3:0] KEYS_Y,
+
+    // Music
+    output SPEAKER_PWM
+
 );
 
 logic CLK_25MHz;
@@ -81,7 +85,9 @@ heiscore_arcade_engine I_DUT (
     .lcd_d_en    (lcd_d_en),
 
     .KEYS_X      (KEYS_X),
-    .KEYS_Y      (KEYS_Y)
+    .KEYS_Y      (KEYS_Y),
+
+    .SPEAKER_PWM (SPEAKER_PWM)
 );
 
 always_comb begin

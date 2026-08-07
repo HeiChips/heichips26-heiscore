@@ -31,3 +31,6 @@ Net "KEYS_Y[0]"    Loc = "IO_NB_A0"; # KEYS_Y0
 Net "KEYS_Y[1]"    Loc = "IO_NB_B1"; # KEYS_Y1
 Net "KEYS_Y[2]"    Loc = "IO_NB_A1"; # KEYS_Y2
 Net "KEYS_Y[3]"    Loc = "IO_NB_B2"; # KEYS_Y3
+
+
+Net "SPEAKER_PWM"    Loc = "IO_NB_B3"; # PWM_SPEAKER
