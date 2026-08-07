@@ -12,14 +12,15 @@ class TestCollisionUpperLower(NoRTLTestBase[Engine]):
         pass
 
     def the_testbench(self, e: Engine) -> None:
-        pong = Pong(e, Const(200), Const(200), Const(0,0))
+        pong = Pong(e, Const(200), Const(200), Const(0, 1))
         pong.construct_frame()
 
         # Make all walls reflective by setting type to 1
         for item in pong.graphics:
             item._type = Const(1, 4)
 
-        pong.construct_ball()
+        pong.construct_ball(False)
+        e.sync()
         pong.start_game()
 
         # Test collission to first wall
@@ -90,14 +91,16 @@ class TestCollisionLeftRight(NoRTLTestBase[Engine]):
         pass
 
     def the_testbench(self, e: Engine) -> None:
-        pong = Pong(e, Const(200), Const(200), Const(0,0))
+        pong = Pong(e, Const(200), Const(200), Const(0, 1))
         pong.construct_frame()
 
         # Make all walls reflective by setting type to 1
         for item in pong.graphics:
             item._type = Const(1, 4)
 
-        pong.construct_ball()
+        pong.construct_ball(False)
+
+        e.sync()
         pong.start_game()
 
         # Test collission to first wall
