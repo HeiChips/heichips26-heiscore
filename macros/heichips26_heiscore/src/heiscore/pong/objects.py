@@ -121,6 +121,9 @@ class Ball(GraphicsObject):
 
         self.collision_callbacks = []
 
+        self.running = self.engine.define_scratch(1)
+        self.engine.set(self.running, 0)
+
     def color(self, x: Operand, y: Operand):
         return IfThenElse(All(x >= self.lx, y >= self.ly, x < self.ux, y < self.uy), 3, 0)
 
@@ -131,7 +134,13 @@ class Ball(GraphicsObject):
 
         self.engine.print('Ball BBox = (%0d, %0d), (%0d, %0d)', self.lx, self.ly, self.ux, self.uy)
 
-    def tick(self) -> None:
+    def tick(self)-> None:
+        with self.engine.condition(self.running):
+            self.mechanics()
+        with self.engine.else_condition():
+            pass
+
+    def mechanics(self) -> None:
         self.engine.set(self.position[0], IfThenElse(self.direction[0], self.position[0] - self.velocity[0], self.position[0] + self.velocity[0]))
         self.engine.set(self.position[1], IfThenElse(self.direction[1], self.position[1] - self.velocity[1], self.position[1] + self.velocity[1]))
 

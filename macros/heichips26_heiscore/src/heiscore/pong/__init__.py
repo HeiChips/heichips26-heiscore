@@ -7,11 +7,12 @@ from .objects import Ball, Paddle, Score
 
 
 class Pong(GraphicsStash):
-    def __init__(self, engine: Engine, pos_paddle_1: Renderable, pos_paddle_2: Renderable) -> None:
+    def __init__(self, engine: Engine, pos_paddle_1: Renderable, pos_paddle_2: Renderable, start: Renderable) -> None:
         super().__init__(engine)
 
         self.pos_paddle_1 = pos_paddle_1
         self.pos_paddle_2 = pos_paddle_2
+        self.start = start
 
         self.engine.sync()
 
@@ -59,6 +60,7 @@ class Pong(GraphicsStash):
             with self.engine.condition(collided == 3):
                 self.score_1.set_value(self.score_1.get_value() + 1)
                 self.initialize_ball_position()
+                # self.wait_for_start()
             with self.engine.else_condition():
                 pass
             self.engine.sync()
@@ -67,6 +69,7 @@ class Pong(GraphicsStash):
             with self.engine.condition(collided == 4):
                 self.score_2.set_value(self.score_2.get_value() + 1)
                 self.initialize_ball_position()
+                # self.wait_for_start()
             with self.engine.else_condition():
                 pass
             self.engine.sync()
@@ -74,7 +77,8 @@ class Pong(GraphicsStash):
         def cb_end_of_game(collided):
             with self.engine.condition(Any(self.score_1.get_value() == 0xA, self.score_2.get_value() == 0xA)):
                 self.score_1.set_value(0)
-                self.score_2.set_value(1)
+                self.score_2.set_value(0)
+                self.wait_for_start()
             with self.engine.else_condition():
                 pass
 
@@ -88,3 +92,14 @@ class Pong(GraphicsStash):
 
         self.engine.set(self.ball.velocity[0], 1)
         self.engine.set(self.ball.velocity[1], 1)
+
+    def wait_for_start(self) -> None:
+        self.engine.wait_for(self.start)
+        self.start_game()
+        self.engine.sync()
+
+    def start_game(self) -> None:
+        self.engine.set(self.ball.running, 1)
+
+    def pause_game(self) -> None:
+        self.engine.set(self.ball.running, 0)

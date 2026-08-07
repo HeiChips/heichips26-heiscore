@@ -1,4 +1,4 @@
-from nortl import Const, Engine, IfThenElse, Volatile
+from nortl import Const, Engine, IfThenElse, Volatile, Any
 from nortl.core.protocols import Renderable
 
 from .core.vga import VGA
@@ -8,15 +8,19 @@ def assemble_pong(e: Engine, p1_up: Renderable, p1_dn: Renderable, p2_up: Render
     paddle_pos1 = Volatile(e.define_scratch(9), 'identical_rw', 'exclusive_read')
     paddle_pos2 = Volatile(e.define_scratch(9), 'identical_rw', 'exclusive_read')
 
-    pong = Pong(e, paddle_pos1, paddle_pos2)
+    start = Any(p1_dn, p1_up, p2_dn, p2_up)
+
+    pong = Pong(e, paddle_pos1, paddle_pos2, start)
 
     timer = e.create_timer(24)
 
     e.sync()
 
-    paddle_max_y = 450
+    paddle_max_y = 420
 
     with e.fork('Paddle_handling'):  # noqa: SIM117
+        pong.wait_for_start()
+
         with e.while_loop(Const(True)):
             timer.wait_delay(200000)
 
@@ -53,7 +57,7 @@ def build_fpga() -> Engine:
     p2_dn = Volatile(e.define_local('P2_DN', 1, 0), 'identical_rw')
 
 
-    pong = assemble_pong(e, p1_dn, p1_dn, p2_up, p2_dn)
+    pong = assemble_pong(e, p1_dn, p1_up, p2_up, p2_dn)
 
     interlock_delay = e.create_timer()
 
