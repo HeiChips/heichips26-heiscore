@@ -58,6 +58,11 @@ MODULES_SIM := \
 # MODULES_SYNTH so yosys and LibreLane never see it.
 LINT_WAIVERS := $(SRC_DIR)/generated.vlt
 
+# nortl flattens every state guard into one expression, so a single line of the
+# generated engine runs past Verilator's default cap of 40k preprocessor tokens
+# per line and the parser then dies on the truncated line.
+VERILATOR_PREPROC := --preproc-token-limit 400000
+
 # Source file for a single non-TOP CELL: hand-written $(SRC_DIR) first, then the
 # generated engines in $(GEN_DIR) (prefers .sv, falls back to .v)
 _CELL_SRC = $(or $(wildcard $(SRC_DIR)/$(CELL).sv),$(wildcard $(GEN_DIR)/$(CELL).sv),$(SRC_DIR)/$(CELL).v)
@@ -103,7 +108,7 @@ pytest: ## Run the Python test suite (unit tests, LVS-VGA check, FPGA flows)
 # The "| rtl" order-only prerequisite here and below emits the engines if they are
 # missing or older than the nortl sources; it is a no-op once they are up to date.
 lint-verilog: | rtl ## Lint Verilog source files with Verilator (usage: make lint-verilog [CELL=<cellname>])
-	verilator --lint-only --top-module $(CELL) -I"$(SRC_DIR)" -I"$(GEN_DIR)" $(LINT_WAIVERS) $(_LINT_SRCS)
+	verilator --lint-only $(VERILATOR_PREPROC) --top-module $(CELL) -I"$(SRC_DIR)" -I"$(GEN_DIR)" $(LINT_WAIVERS) $(_LINT_SRCS)
 .PHONY: lint-verilog
 
 lint-verilog-all: ## Lint all Verilog source files (pin wrapper + generated engine)

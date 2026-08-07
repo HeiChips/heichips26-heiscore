@@ -118,7 +118,17 @@ def heichips26_heiscore_runner():
         build_args = ["-DSIM", "-gno-specify"]
 
     if sim == "verilator":
-        build_args = ["--timing", "--trace", "--trace-fst", "--trace-structs"]
+        # --preproc-token-limit: nortl flattens every state guard into one
+        # expression, so a single line of the generated engine runs past
+        # Verilator's default cap of 40k preprocessor tokens per line.
+        build_args = [
+            "--timing",
+            "--trace",
+            "--trace-fst",
+            "--trace-structs",
+            "--preproc-token-limit",
+            "400000",
+        ]
 
     runner = get_runner(sim)
     runner.build(
