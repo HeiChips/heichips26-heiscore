@@ -36,7 +36,11 @@ module heichips26_heiscore (
         .green       (vga_g),
         .blue        (vga_b),
         .hsync       (vga_hsync),
-        .vsync       (vga_vsync)
+        .vsync       (vga_vsync),
+        .p1_dn       (ui_in[0]),
+        .p1_up       (ui_in[1]),
+        .p2_dn       (ui_in[2]),
+        .p2_up       (ui_in[3])
     );
 
     assign uo_out  = {vga_hsync, vga_b, vga_g, vga_r, vga_vsync, vga_b, vga_g, vga_r};

@@ -4,8 +4,8 @@ from pathlib import Path
 
 from nortl import Const, Engine
 
-from heiscore import build_arcade
-from heiscore.core.lcd import MADCTL_LANDSCAPE_BGR, LCD
+from heiscore import build_arcade, build_tt
+from heiscore.core.lcd import LCD, MADCTL_LANDSCAPE_BGR
 from heiscore.core.objects import Box, GraphicsStash
 from heiscore.core.transform import Viewport
 from heiscore.core.vga import VGA
@@ -25,21 +25,7 @@ ARCADE_RTL_PATH = GENERATED_DIR / f'{ARCADE_ENGINE_NAME}.sv'
 
 def build() -> Engine:
     """The VGA design that gets taped out."""
-    engine = Engine(ENGINE_NAME)
-
-    pong = Pong(engine, Const(0), Const(0), Const(1))
-    timer = engine.create_timer()
-
-    with engine.fork("display_thread"):
-        VGA(engine, pong).run()
-
-    with engine.fork("main_loop"):
-        with engine.while_loop(Const(True)):
-            timer.wait_delay(20000)
-            pong.tick()
-
-
-    return engine
+    return build_tt(ENGINE_NAME)
 
 
 def build_lcd() -> Engine:

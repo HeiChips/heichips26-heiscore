@@ -78,6 +78,7 @@ class Pong(GraphicsStash):
             with self.engine.condition(Any(self.score_1.get_value() == 0xA, self.score_2.get_value() == 0xA)):
                 self.score_1.set_value(0)
                 self.score_2.set_value(0)
+                self.wait_for_start()
             with self.engine.else_condition():
                 pass
 

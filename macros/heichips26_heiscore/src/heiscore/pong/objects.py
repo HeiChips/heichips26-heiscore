@@ -1,4 +1,4 @@
-from nortl import All, Any, Const, Engine, IfThenElse, Volatile, Concat
+from nortl import All, Any, Concat, Const, Engine, IfThenElse, Volatile
 from nortl.core.protocols import Operand, Renderable
 
 from heiscore.core.objects import Box, GraphicsObject, GraphicsStash
@@ -101,18 +101,17 @@ class Score(GraphicsStash):
 
 class Ball(GraphicsObject):
     ball_bitmap = [  # noqa: RUF012
-        [0,0,0,0,3,3,0,0,0,0],
-        [0,0,5,4,3,3,4,5,0,0],
-        [0,5,4,2,3,3,2,4,5,0],
-        [0,4,2,2,3,3,2,2,4,0],
-        [3,3,3,3,3,3,3,3,3,3],
-        [3,3,3,3,3,3,3,3,3,3],
-        [0,4,2,2,3,3,2,2,4,0],
-        [0,5,4,2,3,3,2,4,5,0],
-        [0,0,5,4,3,3,4,5,0,0],
-        [0,0,0,0,3,3,0,0,0,0],
+        [0, 0, 0, 0, 3, 3, 0, 0, 0, 0],
+        [0, 0, 5, 4, 3, 3, 4, 5, 0, 0],
+        [0, 5, 4, 2, 3, 3, 2, 4, 5, 0],
+        [0, 4, 2, 2, 3, 3, 2, 2, 4, 0],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+        [0, 4, 2, 2, 3, 3, 2, 2, 4, 0],
+        [0, 5, 4, 2, 3, 3, 2, 4, 5, 0],
+        [0, 0, 5, 4, 3, 3, 4, 5, 0, 0],
+        [0, 0, 0, 0, 3, 3, 0, 0, 0, 0],
     ]
-
 
     def __init__(self, engine: Engine, all_objects: GraphicsStash):
         super().__init__(engine)
@@ -139,13 +138,14 @@ class Ball(GraphicsObject):
         self.engine.set(self.running, 0)
 
     def color(self, x: Operand, y: Operand) -> Renderable:
-        # return IfThenElse(All(x >= self.lx, y >= self.ly, x < self.ux, y < self.uy), 3, 0)
+        return IfThenElse(All(x >= self.lx, y >= self.ly, x < self.ux, y < self.uy), 3, 0)
 
-
-        color = Const(0,4)
+        color = Const(0, 4)
         for i in range(10):
             for j in range(10):
-                color=IfThenElse(All(self.half_size + x - self.position[0]==i, self.half_size + y - self.position[1]==j), self.ball_bitmap[i][j], color)
+                color = IfThenElse(
+                    All(self.half_size + x - self.position[0] == i, self.half_size + y - self.position[1] == j), self.ball_bitmap[i][j], color
+                )
 
         return color
 
@@ -156,15 +156,25 @@ class Ball(GraphicsObject):
 
         self.engine.print('Ball BBox = (%0d, %0d), (%0d, %0d)', self.lx, self.ly, self.ux, self.uy)
 
-    def tick(self)-> None:
+    def tick(self) -> None:
         with self.engine.condition(self.running):
             self.mechanics()
         with self.engine.else_condition():
             pass
 
     def mechanics(self) -> None:
-        self.engine.set(self.position[0], IfThenElse(self.direction[0], self.position[0] - Concat(Const(0, 6), self.velocity[0]), self.position[0] + Concat(Const(0,6), self.velocity[0])))
-        self.engine.set(self.position[1], IfThenElse(self.direction[1], self.position[1] - Concat(Const(0, 6), self.velocity[1]), self.position[1] + Concat(Const(0,6), self.velocity[1])))
+        self.engine.set(
+            self.position[0],
+            IfThenElse(
+                self.direction[0], self.position[0] - Concat(Const(0, 6), self.velocity[0]), self.position[0] + Concat(Const(0, 6), self.velocity[0])
+            ),
+        )
+        self.engine.set(
+            self.position[1],
+            IfThenElse(
+                self.direction[1], self.position[1] - Concat(Const(0, 6), self.velocity[1]), self.position[1] + Concat(Const(0, 6), self.velocity[1])
+            ),
+        )
 
         self.engine.sync()
 

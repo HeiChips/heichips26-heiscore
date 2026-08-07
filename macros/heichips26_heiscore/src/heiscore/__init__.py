@@ -171,3 +171,19 @@ def build_arcade() -> Engine:
     make_music(e, start_music)
 
     return e
+
+
+def build_tt(ENGINE_NAME: str) -> Engine:
+    engine = Engine(ENGINE_NAME)
+
+    p1_up = engine.define_input('p1_up')
+    p2_up = engine.define_input('p2_up')
+    p1_dn = engine.define_input('p1_dn')
+    p2_dn = engine.define_input('p2_dn')
+
+    pong = assemble_pong(engine, p1_up, p1_dn, p2_up, p2_dn)
+
+    with engine.fork('display_thread'):
+        VGA(engine, pong).run()
+
+    return engine
