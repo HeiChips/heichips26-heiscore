@@ -1,0 +1,57 @@
+# Pin assignment for playable Pong on the Olimex GateMate EVB with the IMS
+# Arcade hat, driving the VGA output and the hat's ILI9341 panel at once.
+#
+# VGA locations come from olimex-gatemate.ccf, LCD and keys from
+# ims-arcade_full-hat-pinout.ccf.reference, which documents the full hat pinout
+# under the arcade SoC's net names. The three groups live in separate IO banks
+# (WB, EB, NB), so they coexist -- tests/artifacts/fpga/check_ccf.py verifies
+# that no location is claimed twice.
+
+Pin_in  "CLK_I"        Loc = "IO_SB_A8" | SCHMITT_TRIGGER=true;  # 10 MHz osc
+Pin_in  "RSTN_ASYNC_I" Loc = "IO_SB_B7" | SCHMITT_TRIGGER=true;  # ~RESET
+
+Pin_out "locked"       Loc = "IO_EB_A0";  # CCEVB J2 pin 33, Oli BANK_EB1 pin 19
+
+# VGA
+Pin_out "VGA_HSYNC"    Loc = "IO_WB_A1";
+Pin_out "VGA_VSYNC"    Loc = "IO_WB_B1";
+
+Pin_out "VGA_RED3"     Loc = "IO_WB_A2";
+Pin_out "VGA_RED2"     Loc = "IO_WB_B2";
+Pin_out "VGA_RED1"     Loc = "IO_WB_A3";
+Pin_out "VGA_RED0"     Loc = "IO_WB_B3";
+
+Pin_out "VGA_GREEN3"   Loc = "IO_WB_A4";
+Pin_out "VGA_GREEN2"   Loc = "IO_WB_B4";
+Pin_out "VGA_GREEN1"   Loc = "IO_WB_A5";
+Pin_out "VGA_GREEN0"   Loc = "IO_WB_B5";
+
+Pin_out "VGA_BLUE3"    Loc = "IO_WB_A6";
+Pin_out "VGA_BLUE2"    Loc = "IO_WB_B6";
+Pin_out "VGA_BLUE1"    Loc = "IO_WB_A7";
+Pin_out "VGA_BLUE0"    Loc = "IO_WB_B7";
+
+# LCD
+Pin_out "LCD_D[0]"     Loc = "IO_EB_A6";
+Pin_out "LCD_D[1]"     Loc = "IO_EB_B6";
+Pin_out "LCD_D[2]"     Loc = "IO_EB_A5";
+Pin_out "LCD_D[3]"     Loc = "IO_EB_B5";
+Pin_out "LCD_D[4]"     Loc = "IO_EB_A4";
+Pin_out "LCD_D[5]"     Loc = "IO_EB_B4";
+Pin_out "LCD_D[6]"     Loc = "IO_EB_A3";
+Pin_out "LCD_D[7]"     Loc = "IO_EB_B3";
+
+Pin_out "LCD_WR_N"     Loc = "IO_EB_B7";  # LCD_~WR
+Pin_out "LCD_DC_N"     Loc = "IO_EB_A7";  # LCD_C~D
+Pin_out "LCD_RD_N"     Loc = "IO_EB_B8";  # LCD_~RD
+Pin_out "LCD_VSYNC"    Loc = "IO_EB_A2";
+Pin_out "LCD_BL"       Loc = "IO_EB_B2";  # backlight
+Pin_out "LCD_RST_N"    Loc = "IO_EB_A8";  # panel ~RESET
+
+# KEYS
+Pin_out "KEYS_X[0]"    Loc = "IO_NB_B0";
+Pin_out "KEYS_X[1]"    Loc = "IO_NB_A2";
+Pin_in  "KEYS_Y[0]"    Loc = "IO_NB_A0";
+Pin_in  "KEYS_Y[1]"    Loc = "IO_NB_B1";
+Pin_in  "KEYS_Y[2]"    Loc = "IO_NB_A1";
+Pin_in  "KEYS_Y[3]"    Loc = "IO_NB_B2";

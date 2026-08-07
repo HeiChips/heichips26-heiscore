@@ -1,6 +1,8 @@
 from nortl import Const, Engine, IfThenElse, Volatile, Any
 from nortl.core.protocols import Renderable
 
+from .core.lcd import MADCTL_LANDSCAPE_BGR, LCD
+from .core.transform import Viewport
 from .core.vga import VGA
 from .pong import Pong
 
@@ -45,9 +47,12 @@ def assemble_pong(e: Engine, p1_up: Renderable, p1_dn: Renderable, p2_up: Render
     return pong
 
 
-def build_fpga() -> Engine:
-    e = Engine('my_engine')
+def define_keys(e: Engine) -> tuple:
+    """Declare the arcade hat's key matrix ports and the four debounced paddle keys.
 
+    The hat wires its keys as a 2x4 matrix: ``KEYS_X`` drives the two columns,
+    ``KEYS_Y`` reads the four rows back, active low.
+    """
     keys_x = e.define_output('KEYS_X', 2, 0)
     keys_y = e.define_input('KEYS_Y', 4)
 
@@ -56,6 +61,34 @@ def build_fpga() -> Engine:
     p1_dn = Volatile(e.define_local('P1_DN', 1, 0), 'identical_rw')
     p2_dn = Volatile(e.define_local('P2_DN', 1, 0), 'identical_rw')
 
+    return keys_x, keys_y, p1_up, p1_dn, p2_up, p2_dn
+
+
+def scan_keys(e: Engine, timer, keys_x, keys_y, p1_up, p1_dn, p2_up, p2_dn) -> None:
+    """Body of the input handler: walk the two key columns forever.
+
+    Each column is driven, given a settling delay, and then sampled. Call this
+    inside a fork of its own -- it never returns.
+    """
+    with e.while_loop(Const(True)):
+        e.set(keys_x, 0b10)
+        timer.wait_delay(2000)
+        e.set(p1_up, ~keys_y[1])
+        e.set(p1_dn, ~keys_y[2])
+        timer.wait_delay(2000)
+        e.set(keys_x, 0b11)
+        timer.wait_delay(2000)
+        e.set(keys_x, 0b01)
+        timer.wait_delay(2000)
+        e.set(p2_up, ~keys_y[1])
+        e.set(p2_dn, ~keys_y[0])
+        timer.wait_delay(2000)
+
+
+def build_fpga() -> Engine:
+    e = Engine('my_engine')
+
+    keys_x, keys_y, p1_up, p1_dn, p2_up, p2_dn = define_keys(e)
 
     pong = assemble_pong(e, p1_up, p1_dn, p2_up, p2_dn)
 
@@ -68,20 +101,41 @@ def build_fpga() -> Engine:
 
     with e.fork('VGA_interface'):
         vga_display.run()
-    with e.fork('input_handler'):  # noqa: SIM117
-        with e.while_loop(Const(True)):
-            e.set(keys_x, 0b10)
-            interlock_delay.wait_delay(2000)
-            e.set(p1_up, ~keys_y[1])
-            e.set(p1_dn, ~keys_y[2])
-            interlock_delay.wait_delay(2000)
-            e.set(keys_x, 0b11)
-            interlock_delay.wait_delay(2000)
-            e.set(keys_x, 0b01)
-            interlock_delay.wait_delay(2000)
-            e.set(p2_up, ~keys_y[1])
-            e.set(p2_dn, ~keys_y[0])
-            interlock_delay.wait_delay(2000)
+    with e.fork('input_handler'):
+        scan_keys(e, interlock_delay, keys_x, keys_y, p1_up, p1_dn, p2_up, p2_dn)
 
+
+    return e
+
+
+def build_arcade() -> Engine:
+    """Playable Pong on the IMS Arcade hat, on the VGA output and the panel at once.
+
+    One scene, three forks and two sinks: the VGA generator walks the 640x480
+    master space directly, while the LCD controller walks the panel's 320x240
+    raster through a :class:`~.core.transform.Viewport` that halves both axes.
+    Both sample the same combinational scene, so only the paddle handler inside
+    ``assemble_pong`` drives :meth:`Pong.tick` -- the panel's ~65 Hz frame rate
+    runs free against the 60 Hz VGA output and neither sink owns the game clock.
+    """
+    e = Engine('heiscore_arcade_engine')
+
+    keys_x, keys_y, p1_up, p1_dn, p2_up, p2_dn = define_keys(e)
+
+    pong = assemble_pong(e, p1_up, p1_dn, p2_up, p2_dn)
+
+    interlock_delay = e.create_timer()
+
+    e.sync()
+
+    vga_display = VGA(e, pong)
+    lcd_display = LCD(e, Viewport(e, pong, scale=2), madctl=MADCTL_LANDSCAPE_BGR)
+
+    with e.fork('VGA_interface'):
+        vga_display.run()
+    with e.fork('LCD_interface'):
+        lcd_display.run()
+    with e.fork('input_handler'):
+        scan_keys(e, interlock_delay, keys_x, keys_y, p1_up, p1_dn, p2_up, p2_dn)
 
     return e

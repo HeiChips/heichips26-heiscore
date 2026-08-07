@@ -13,3 +13,4 @@ DUT_SRCS := \
 
 DUT_ENGINE_SRCS := $(GEN_DIR)/heiscore_engine.sv
 DUT_LCD_SRCS    := $(GEN_DIR)/heiscore_lcd_engine.sv
+DUT_ARCADE_SRCS := $(GEN_DIR)/heiscore_arcade_engine.sv

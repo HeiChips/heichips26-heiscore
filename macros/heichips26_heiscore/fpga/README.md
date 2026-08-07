@@ -11,16 +11,17 @@ in a `<board>_top.sv` that maps board pins to the TinyTapeout-style
 > top-level wrapper), see `../macros/counter/fpga/`. Both flows share the
 > same recipe logic from `fpga.mk` — see below.
 
-| Board       | Directory       | Toolchain                              | Status                     |
-|-------------|-----------------|-----------------------------------------|----------------------------|
-| Olimex GateMate EVB | `fpga/design/olimex-gatemate/` | Yosys → nextpnr-himbaechel → gmpack | Build verified, **default** |
-| Olimex GateMate EVB + IMS Arcade hat | `fpga/design/ims-arcade/` | Yosys → nextpnr-himbaechel → gmpack | Build verified |
-| iCEBreaker  | `fpga/design/icebreaker/` | Yosys → nextpnr-ice40 → icepack      | Build verified, flash untested |
-| ULX3S       | `fpga/design/ulx3s/`   | Yosys → nextpnr-ecp5 → ecppack          | Tested, hardware flash-verified, default |
-| Tang Nano 9K| `fpga/design/nano9k/`  | Yosys → nextpnr-himbaechel → gowin_pack | Build verified, flash untested |
-| Basys 3     | `fpga/design/basys3/`  | Yosys → nextpnr-xilinx → prjxray (`nix-openxc7`) | Tested, hardware flash-verified |
-| Boolean     | `fpga/design/boolean/` | Yosys → nextpnr-xilinx → prjxray (`nix-openxc7`) | Build verified, flash untested |
-| pico-ice    | `fpga/design/pico-ice/` | Yosys → nextpnr-ice40 → icepack         | Build verified, flash untested |
+| Board                                               | Directory                      | Toolchain                                        | Status                                   |
+| --------------------------------------------------- | ------------------------------ | ------------------------------------------------ | ---------------------------------------- |
+| Olimex GateMate EVB                                 | `fpga/design/olimex-gatemate/` | Yosys → nextpnr-himbaechel → gmpack              | Build verified, **default**              |
+| Olimex GateMate EVB + IMS Arcade hat                | `fpga/design/ims-arcade/`      | Yosys → nextpnr-himbaechel → gmpack              | Build verified                           |
+| Olimex GateMate EVB + IMS Arcade hat, playable Pong | `fpga/design/ims-arcade-pong/` | Yosys → nextpnr-himbaechel → gmpack              | Build verified                           |
+| iCEBreaker                                          | `fpga/design/icebreaker/`      | Yosys → nextpnr-ice40 → icepack                  | Build verified, flash untested           |
+| ULX3S                                               | `fpga/design/ulx3s/`           | Yosys → nextpnr-ecp5 → ecppack                   | Tested, hardware flash-verified, default |
+| Tang Nano 9K                                        | `fpga/design/nano9k/`          | Yosys → nextpnr-himbaechel → gowin_pack          | Build verified, flash untested           |
+| Basys 3                                             | `fpga/design/basys3/`          | Yosys → nextpnr-xilinx → prjxray (`nix-openxc7`) | Tested, hardware flash-verified          |
+| Boolean                                             | `fpga/design/boolean/`         | Yosys → nextpnr-xilinx → prjxray (`nix-openxc7`) | Build verified, flash untested           |
+| pico-ice                                            | `fpga/design/pico-ice/`        | Yosys → nextpnr-ice40 → icepack                  | Build verified, flash untested           |
 
 All boards need `yosys`; the iCE40/ECP5/Gowin boards additionally need
 `nextpnr-ice40`/`nextpnr-ecp5`/`nextpnr-himbaechel`, `icepack`/`ecppack`/
@@ -67,40 +68,40 @@ include ../../../../fpga/fpga.mk
 
 ### Set by `dut.mk`
 
-| Variable | | Description |
-|---|---|---|
-| `SRC_DIR` | mandatory | RTL source directory |
+| Variable   |           | Description                                                                       |
+| ---------- | --------- | --------------------------------------------------------------------------------- |
+| `SRC_DIR`  | mandatory | RTL source directory                                                              |
 | `DUT_SRCS` | mandatory | Ordered source file list for the design under test, without the board top wrapper |
 
 ### Set by the board `Makefile`
 
-| Variable | | Description |
-|---|---|---|
-| `TOP` | mandatory | Synthesis top module / instance name |
+| Variable        |           | Description                                                                                          |
+| --------------- | --------- | ---------------------------------------------------------------------------------------------------- |
+| `TOP`           | mandatory | Synthesis top module / instance name                                                                 |
 | `MODULES_SYNTH` | mandatory | Ordered source file list for `TOP` — usually `$(DUT_SRCS)` plus the board's `<board>_top.sv` wrapper |
-| `PCF_FILE` | mandatory | Board pin constraint file |
+| `PCF_FILE`      | mandatory | Board pin constraint file                                                                            |
 
 ### Set by `boards/<board>.mk`
 
-| Variable | | Description |
-|---|---|---|
-| `ARCH` | mandatory | Selects the `arch/<arch>.mk` fragment |
-| `ICE40_DEVICE`, `ECP5_DEVICE`, `GOWIN_DEVICE`/`GOWIN_FAMILY`, `PART` | mandatory | Device and package, whichever the board's arch uses |
-| `CHIPDB`, `XRAY_FAMILY` | mandatory | `xilinx7` only |
-| `OPENFPGALOADER_BOARD` | mandatory | openFPGALoader board profile, unless `LOAD_CMD`/`FLASH_CMD` are set instead |
-| `OPENFPGALOADER_FLAGS` | optional | Extra openFPGALoader flags |
-| `LOAD_CMD` | optional | Complete SRAM load command, replacing the openFPGALoader default, for boards it has no profile for |
-| `FLASH_CMD` | optional | Complete flash write command, replacing the openFPGALoader default, for boards it has no profile for |
+| Variable                                                             |           | Description                                                                                          |
+| -------------------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------- |
+| `ARCH`                                                               | mandatory | Selects the `arch/<arch>.mk` fragment                                                                |
+| `ICE40_DEVICE`, `ECP5_DEVICE`, `GOWIN_DEVICE`/`GOWIN_FAMILY`, `PART` | mandatory | Device and package, whichever the board's arch uses                                                  |
+| `CHIPDB`, `XRAY_FAMILY`                                              | mandatory | `xilinx7` only                                                                                       |
+| `OPENFPGALOADER_BOARD`                                               | mandatory | openFPGALoader board profile, unless `LOAD_CMD`/`FLASH_CMD` are set instead                          |
+| `OPENFPGALOADER_FLAGS`                                               | optional  | Extra openFPGALoader flags                                                                           |
+| `LOAD_CMD`                                                           | optional  | Complete SRAM load command, replacing the openFPGALoader default, for boards it has no profile for   |
+| `FLASH_CMD`                                                          | optional  | Complete flash write command, replacing the openFPGALoader default, for boards it has no profile for |
 
 ### Set by `arch/<arch>.mk`
 
-| Variable | | Description |
-|---|---|---|
-| `TARGET`, `SYNTH_OPTS` | mandatory | Yosys synth pass and its options |
-| `SYNTH_CMD` | optional | Complete synthesis command, replacing `TARGET`/`SYNTH_OPTS`, for a synth pass that doesn't fit the `$(TARGET) $(SYNTH_OPTS) -top $(TOP)` shape (e.g. `synth_xilinx`) |
-| `PNR_CMD`, `PNR_OUT` | mandatory | Place-and-route command and its output file |
-| `PNR_ARGS`, `PNR_DEPS` | optional | PnR flags, and extra prerequisites (e.g. a generated chipdb) |
-| `PACK_CMD`, `BITSTREAM` | mandatory | Bitstream packing command and output file |
+| Variable                |           | Description                                                                                                                                                          |
+| ----------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TARGET`, `SYNTH_OPTS`  | mandatory | Yosys synth pass and its options                                                                                                                                     |
+| `SYNTH_CMD`             | optional  | Complete synthesis command, replacing `TARGET`/`SYNTH_OPTS`, for a synth pass that doesn't fit the `$(TARGET) $(SYNTH_OPTS) -top $(TOP)` shape (e.g. `synth_xilinx`) |
+| `PNR_CMD`, `PNR_OUT`    | mandatory | Place-and-route command and its output file                                                                                                                          |
+| `PNR_ARGS`, `PNR_DEPS`  | optional  | PnR flags, and extra prerequisites (e.g. a generated chipdb)                                                                                                         |
+| `PACK_CMD`, `BITSTREAM` | mandatory | Bitstream packing command and output file                                                                                                                            |
 
 Both fragments assign with `?=` throughout, so a board `Makefile` can still
 override anything.
@@ -150,13 +151,14 @@ sources change. `make build-fpga` from the macro root does that for you; enterin
 this tree directly does not. `dut.mk` offers three source sets, because the boards
 do not all wrap the same thing:
 
-| Variable | Sources | Used by |
-|---|---|---|
-| `DUT_SRCS` | pin wrapper + `generated/heiscore_engine.sv` | boards emulating the submitted top cell |
-| `DUT_ENGINE_SRCS` | `generated/heiscore_engine.sv` | `olimex-gatemate` |
-| `DUT_LCD_SRCS` | `generated/heiscore_lcd_engine.sv` | `ims-arcade` |
+| Variable          | Sources                                      | Used by                                 |
+| ----------------- | -------------------------------------------- | --------------------------------------- |
+| `DUT_SRCS`        | pin wrapper + `generated/heiscore_engine.sv` | boards emulating the submitted top cell |
+| `DUT_ENGINE_SRCS` | `generated/heiscore_engine.sv`               | `olimex-gatemate`                       |
+| `DUT_LCD_SRCS`    | `generated/heiscore_lcd_engine.sv`           | `ims-arcade`                            |
+| `DUT_ARCADE_SRCS` | `generated/heiscore_arcade_engine.sv`        | `ims-arcade-pong`                       |
 
-The two engines each carry their own copy of the `nortl_*` library modules, so a
+The engines each carry their own copy of the `nortl_*` library modules, so a
 board must pick exactly one of them.
 
 The default board is the **Olimex GateMate EVB** (Cologne Chip CCGM1A1: Yosys
@@ -166,6 +168,11 @@ through the pin wrapper: a 10 MHz board oscillator feeds `pll_10_to_25` for the
 25 MHz pixel clock, and the engine's 1-bit colour channels are replicated across
 each 4-bit VGA channel of the resistor ladder. `ims-arcade` is the same board
 with the IMS Arcade hat, driving its ILI9341 panel from the LCD engine.
+
+`ims-arcade-pong` is the playable one: the same hat, with Pong on the VGA output
+and the panel at the same time. Its engine holds one scene and two sinks — the
+VGA generator walks the 640x480 master space, the LCD controller walks the
+panel's 320x240 raster through a `Viewport` that halves both axes.
 
 ## Show Available Targets
 
@@ -177,7 +184,6 @@ make
 make help
 ```
 
-
 ## Clean
 
 Remove generated files:
@@ -185,7 +191,6 @@ Remove generated files:
 ```sh
 make clean
 ```
-
 
 ## Synthesis
 
@@ -202,7 +207,6 @@ Generate a generic synthesis netlist and Yosys graph:
 make synthesis_generic
 ```
 
-
 ## Place-and-Route
 
 Run place-and-route with nextpnr:
@@ -210,7 +214,6 @@ Run place-and-route with nextpnr:
 ```sh
 make pr
 ```
-
 
 ## Bitstream Generation and Flash
 
@@ -235,7 +238,6 @@ make flash_bitstream   # into the board's flash, survives a power cycle (useful 
 > (`openFPGALoader` has no dedicated iCEBreaker board profile), and
 > `dfu-util` for the pico-ice, which has no `openFPGALoader` profile either.
 
-
 ## Convert to Verilog
 
 Convert the SystemVerilog top module to Verilog:
@@ -243,7 +245,6 @@ Convert the SystemVerilog top module to Verilog:
 ```sh
 make convert
 ```
-
 
 ## Build All
 

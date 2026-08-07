@@ -42,6 +42,7 @@ PY_DIR       := src
 PY_SRCS      := $(shell find $(PY_DIR) -name '*.py' 2>/dev/null)
 ENGINE       := $(GEN_DIR)/heiscore_engine.sv
 LCD_ENGINE   := $(GEN_DIR)/heiscore_lcd_engine.sv
+ARCADE_ENGINE := $(GEN_DIR)/heiscore_arcade_engine.sv
 PYTHON       := PYTHONPATH=$(MAKEFILE_DIR)/$(PY_DIR):$$PYTHONPATH python3
 
 # Variables for simulation and linting targets. The engine is generated; the
@@ -89,7 +90,7 @@ help: ## Show this help message
 .PHONY: help
 # ================================================================================================
 
-rtl: $(ENGINE) $(LCD_ENGINE) ## Regenerate the engine RTL from the nortl sources
+rtl: $(ENGINE) $(LCD_ENGINE) $(ARCADE_ENGINE) ## Regenerate the engine RTL from the nortl sources
 .PHONY: rtl
 
 $(ENGINE): $(PY_SRCS)
@@ -97,6 +98,9 @@ $(ENGINE): $(PY_SRCS)
 
 $(LCD_ENGINE): $(PY_SRCS)
 	$(PYTHON) -m heiscore.top lcd
+
+$(ARCADE_ENGINE): $(PY_SRCS)
+	$(PYTHON) -m heiscore.top arcade
 
 pytest: ## Run the Python test suite (unit tests, LVS-VGA check, FPGA flows)
 	cd $(MAKEFILE_DIR) && $(PYTHON) -m pytest tests
