@@ -87,6 +87,32 @@ def scan_keys(e: Engine, timer, keys_x, keys_y, p1_up, p1_dn, p2_up, p2_dn) -> N
         timer.wait_delay(2000)
 
 
+def make_music(e: Engine, start_music: Renderable):
+
+    # Wait for the music
+
+    music = MusicSequencerPWM(e, e.define_output('SPEAKER_PWM', 1, 0), 2)
+    music.build_channels()
+    with e.fork('music_input'):
+        e.wait_for(Volatile(start_music, 'identical_rw', 'exclusive_read'))
+        music.input_channels[0].send(Concat(Const(7, 4), music.tone_to_id['A']))
+        music.input_channels[0].send(Concat(Const(1, 4), Const(0, 4)))
+        music.input_channels[0].send(Concat(Const(7, 4), music.tone_to_id['A']))
+        music.input_channels[0].send(Concat(Const(1, 4), Const(0, 4)))
+        music.input_channels[0].send(Concat(Const(7, 4), music.tone_to_id['A']))
+        music.input_channels[0].send(Concat(Const(1, 4), Const(0, 4)))
+        music.input_channels[0].send(Concat(Const(6, 4), music.tone_to_id['F']))
+        music.input_channels[0].send(Concat(Const(2, 4), music.tone_to_id['C2']))
+        music.input_channels[0].send(Concat(Const(7, 4), music.tone_to_id['A']))
+        music.input_channels[0].send(Concat(Const(1, 4), Const(0, 4)))
+        music.input_channels[0].send(Concat(Const(6, 4), music.tone_to_id['F']))
+        music.input_channels[0].send(Concat(Const(2, 4), music.tone_to_id['C2']))
+        music.input_channels[0].send(Concat(Const(7, 4), music.tone_to_id['A']))
+        music.input_channels[0].send(Concat(Const(1, 4), Const(0, 4)))
+        music.input_channels[0].send(Concat(Const(16, 4), music.tone_to_id['A']))
+        music.input_channels[0].send(Concat(Const(16, 4), Const(0, 4)))
+
+
 def build_fpga() -> Engine:
     e = Engine('my_engine')
 
@@ -105,31 +131,9 @@ def build_fpga() -> Engine:
     with e.fork('input_handler'):
         scan_keys(e, interlock_delay, keys_x, keys_y, p1_up, p1_dn, p2_up, p2_dn)
 
-    # Wait for the music
+    start_music = e.define_local('start_music', 1, value=Any(p1_dn, p1_up, p2_dn, p2_up))
+    make_music(e, start_music)
 
-    music = MusicSequencerPWM(e, e.define_output('music_pwm', 1, 0), 2)
-    music.build_channels()
-
-    start = e.define_local('start_music', 1, value=Any(p1_dn, p1_up, p2_dn, p2_up))
-
-    with e.fork('music_input'):
-        e.wait_for(Volatile(start, 'identical_rw', 'exclusive_read'))
-        music.input_channels[0].send(Concat(Const(7, 4), music.tone_to_id['A']))
-        music.input_channels[0].send(Concat(Const(1, 4), Const(0, 4)))
-        music.input_channels[0].send(Concat(Const(7, 4), music.tone_to_id['A']))
-        music.input_channels[0].send(Concat(Const(1, 4), Const(0, 4)))
-        music.input_channels[0].send(Concat(Const(7, 4), music.tone_to_id['A']))
-        music.input_channels[0].send(Concat(Const(1, 4), Const(0, 4)))
-        music.input_channels[0].send(Concat(Const(6, 4), music.tone_to_id['F']))
-        music.input_channels[0].send(Concat(Const(2, 4), music.tone_to_id['C2']))
-        music.input_channels[0].send(Concat(Const(7, 4), music.tone_to_id['A']))
-        music.input_channels[0].send(Concat(Const(1, 4), Const(0, 4)))
-        music.input_channels[0].send(Concat(Const(6, 4), music.tone_to_id['F']))
-        music.input_channels[0].send(Concat(Const(2, 4), music.tone_to_id['C2']))
-        music.input_channels[0].send(Concat(Const(7, 4), music.tone_to_id['A']))
-        music.input_channels[0].send(Concat(Const(1, 4), Const(0, 4)))
-        music.input_channels[0].send(Concat(Const(16, 4), music.tone_to_id['A']))
-        music.input_channels[0].send(Concat(Const(16, 4), Const(0, 4)))
     return e
 
 
@@ -162,5 +166,8 @@ def build_arcade() -> Engine:
         lcd_display.run()
     with e.fork('input_handler'):
         scan_keys(e, interlock_delay, keys_x, keys_y, p1_up, p1_dn, p2_up, p2_dn)
+
+    start_music = e.define_local('start_music', 1, value=Any(p1_dn, p1_up, p2_dn, p2_up))
+    make_music(e, start_music)
 
     return e
