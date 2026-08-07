@@ -4,9 +4,9 @@ from pathlib import Path
 
 from nortl import Const, Engine
 
-from heiscore.core.lcd import MADCTL_LANDSCAPE_BGR, LCD
+# from heiscore.core.lcd import MADCTL_LANDSCAPE_BGR, LCD
 from heiscore.core.objects import Box, GraphicsStash
-from heiscore.core.transform import Viewport
+# from heiscore.core.transform import Viewport
 from heiscore.core.vga import VGA
 from heiscore.pong import Pong
 
@@ -24,8 +24,7 @@ def build() -> Engine:
     """The VGA design that gets taped out."""
     engine = Engine(ENGINE_NAME)
 
-    pong = Pong(engine, Const(0), Const(0))
-    pong.construct_frame()
+    pong = Pong(engine, Const(0), Const(0), Const(1))
     timer = engine.create_timer()
 
     with engine.fork("display_thread"):
@@ -49,9 +48,9 @@ def build_lcd() -> Engine:
     graphics.register(Box(engine, 60, 60, 120, 140, 0x2))
     graphics.register(Box(engine, 80, 80, 160, 160, 0x2))
 
-    view = Viewport(engine, graphics, scale=2)
+    #view = Viewport(engine, graphics, scale=2)
 
-    LCD(engine, view, madctl=MADCTL_LANDSCAPE_BGR).run()
+    #LCD(engine, view, madctl=MADCTL_LANDSCAPE_BGR).run()
 
     return engine
 

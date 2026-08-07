@@ -57,7 +57,7 @@ def build_fpga() -> Engine:
     p2_dn = Volatile(e.define_local('P2_DN', 1, 0), 'identical_rw')
 
 
-    pong = assemble_pong(e, p1_dn, p1_up, p2_up, p2_dn)
+    pong = assemble_pong(e, p1_up, p1_dn, p2_up, p2_dn)
 
     interlock_delay = e.create_timer()
 

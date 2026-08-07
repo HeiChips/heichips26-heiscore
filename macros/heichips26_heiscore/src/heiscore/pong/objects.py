@@ -100,6 +100,20 @@ class Score(GraphicsStash):
 
 
 class Ball(GraphicsObject):
+    ball_bitmap = [  # noqa: RUF012
+        [0,0,0,0,3,3,0,0,0,0],
+        [0,0,5,4,3,3,4,5,0,0],
+        [0,5,4,2,3,3,2,4,5,0],
+        [0,4,2,2,3,3,2,2,4,0],
+        [3,3,3,3,3,3,3,3,3,3],
+        [3,3,3,3,3,3,3,3,3,3],
+        [0,4,2,2,3,3,2,2,4,0],
+        [0,5,4,2,3,3,2,4,5,0],
+        [0,0,5,4,3,3,4,5,0,0],
+        [0,0,0,0,3,3,0,0,0,0],
+    ]
+
+
     def __init__(self, engine: Engine, all_objects: GraphicsStash):
         super().__init__(engine)
 
@@ -124,8 +138,16 @@ class Ball(GraphicsObject):
         self.running = self.engine.define_scratch(1)
         self.engine.set(self.running, 0)
 
-    def color(self, x: Operand, y: Operand):
-        return IfThenElse(All(x >= self.lx, y >= self.ly, x < self.ux, y < self.uy), 3, 0)
+    def color(self, x: Operand, y: Operand) -> Renderable:
+        # return IfThenElse(All(x >= self.lx, y >= self.ly, x < self.ux, y < self.uy), 3, 0)
+
+
+        color = Const(0,4)
+        for i in range(10):
+            for j in range(10):
+                color=IfThenElse(All(self.half_size + x - self.position[0]==i, self.half_size + y - self.position[1]==j), self.ball_bitmap[i][j], color)
+
+        return color
 
     def visible(self, x: Operand, y: Operand) -> Renderable:
         return All(x >= self.lx, y >= self.ly, x < self.ux, y < self.uy)
