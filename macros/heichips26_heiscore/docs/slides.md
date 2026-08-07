@@ -159,11 +159,11 @@ assign uo_out = {vga_hsync, vga_b, vga_g, vga_r,
 | Die         | 200 × 200 µm (tiny slot) |
 | PDK         | IHP `ihp-sg13cmos5l`     |
 | Clock       | 25 MHz (40 ns)           |
-| Std cells   | 1 859 (+ 1 916 fill)     |
-| Flip-flops  | 110                      |
-| Utilization | 62.6 %                   |
+| Std cells   | 1 806 (+ 1 916 fill)     |
+| Flip-flops  | 135                      |
+| Utilization | 76 %                   |
 | Routing     | Metal1–Metal4            |
-| Power       | 211 µW @ 1.2 V, 25 °C    |
+| Power       | 682 µW @ 1.2 V, 25 °C    |
 
 </div>
 </div>
@@ -178,11 +178,26 @@ assign uo_out = {vga_hsync, vga_b, vga_g, vga_r,
 | LVS (netgen)            | **Circuits match uniquely**                   |
 | Antenna                 | **0 violations**, 0 diodes needed             |
 | Zero-area polygons      | 0                                             |
-| Setup / hold, 3 corners | **0 violations** — WNS +30.2 ns, WHS +0.26 ns |
+| Setup / hold, 3 corners | **0 violations** — WNS +30.2 ns, WHS +0.28 ns |
 | Max slew / max cap      | 0 violations                                  |
-| IR drop                 | 0.15 mV worst case                            |
+| IR drop                 | 0.25 mV worst case                            |
 
 <span class="small">Corners: nom_typ 1.20 V 25 °C, nom_slow 1.08 V 125 °C, nom_fast 1.32 V −40 °C. One max-fanout warning remains, with no timing impact at 25 MHz. Reports live in <code>verification/</code>.</span>
+
+---
+
+## Verification
+
+
+**IMS Arcade** adds what the tiny slot has no pins for:
+
+- We have pytest :D
+  - Test for Ball dynamics
+  - There is VGA-Playground
+  - We have an FPGA
+
+We want to complete the verification with Verilator by comparing VGA signals from pre- to postlayout.
+
 
 ---
 
