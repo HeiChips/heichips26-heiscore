@@ -1,0 +1,41 @@
+175. Printing statistics.
+
+=== heichips26_heiscore ===
+
+        +----------Local Count, excluding submodules.
+        | 
+     4866 wires
+     5029 wire bits
+       26 public wires
+      189 public wire bits
+        8 ports
+       43 port bits
+     4975 cells
+     1674   $_ANDNOT_
+      157   $_AND_
+      114   $_DFFE_PN0P_
+       18   $_DFF_PN0_
+        3   $_DFF_PN1_
+       86   $_MUX_
+      225   $_NAND_
+      355   $_NOR_
+      124   $_NOT_
+      185   $_ORNOT_
+     1680   $_OR_
+       38   $_XNOR_
+      316   $_XOR_
+
+   Area for cell type $_ANDNOT_ is unknown!
+   Area for cell type $_AND_ is unknown!
+   Area for cell type $_DFFE_PN0P_ is unknown!
+   Area for cell type $_DFF_PN0_ is unknown!
+   Area for cell type $_DFF_PN1_ is unknown!
+   Area for cell type $_MUX_ is unknown!
+   Area for cell type $_NAND_ is unknown!
+   Area for cell type $_NOR_ is unknown!
+   Area for cell type $_NOT_ is unknown!
+   Area for cell type $_ORNOT_ is unknown!
+   Area for cell type $_OR_ is unknown!
+   Area for cell type $_XNOR_ is unknown!
+   Area for cell type $_XOR_ is unknown!
+
