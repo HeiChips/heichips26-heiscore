@@ -10,7 +10,23 @@ slot-size: tiny # small, large, tiny
 analog-pins: 0 # 0-3, only for small or tiny projects
 short-description: A noRTL written implementation of Pong.
 long-description: |
-  TBD
+  HeiScore is a complete two-player Pong machine in the 200 x 200 um tiny slot:
+  no CPU, no framebuffer, no external memory. Running from a 25 MHz clock, it
+  generates a 640 x 480 @ 60 Hz VGA signal pixel by pixel. The screen shows a
+  bouncing ball with a colour bitmap, two paddles, a playfield frame and two
+  7-segment scores. The first player to reach 10 points wins, and the match
+  restarts.
+
+  The design contains no hand-written RTL. It is described in Python with nortl
+  and emitted as SystemVerilog; only the top-level pin wrapper is written by
+  hand. The scene is a combinational function of the pixel position, and the
+  same function drives collision detection. The game state needs only about
+  110 flip-flops.
+
+  Paddles are controlled via ui_in[3:0] (P1/P2 up/down). The VGA output is
+  1 bit per colour on uo_out in TinyVGA Pmod pin order, and the uio pins are
+  unused. The design has also been demonstrated on an FPGA (Olimex GateMate)
+  with a key matrix and an ILI9341 LCD.
 
 # These paths are used to verify your
 # submission during the precheck.
